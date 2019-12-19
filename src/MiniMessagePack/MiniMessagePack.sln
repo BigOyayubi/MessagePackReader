@@ -1,0 +1,23 @@
+
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MiniMessagePack", "MiniMessagePack.csproj", "{4E7BC62C-E63C-406E-A099-47503F8CE26C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MessagePack", "MessagePack\MessagePack.csproj", "{201004C2-D7AA-4EF0-B30C-280A28390613}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|anycpu = Debug|anycpu
+		Release|anycpu = Release|anycpu
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{4E7BC62C-E63C-406E-A099-47503F8CE26C}.Debug|anycpu.ActiveCfg = Debug|anycpu
+		{4E7BC62C-E63C-406E-A099-47503F8CE26C}.Debug|anycpu.Build.0 = Debug|anycpu
+		{4E7BC62C-E63C-406E-A099-47503F8CE26C}.Release|anycpu.ActiveCfg = Release|anycpu
+		{4E7BC62C-E63C-406E-A099-47503F8CE26C}.Release|anycpu.Build.0 = Release|anycpu
+		{201004C2-D7AA-4EF0-B30C-280A28390613}.Debug|anycpu.ActiveCfg = Debug|Any CPU
+		{201004C2-D7AA-4EF0-B30C-280A28390613}.Debug|anycpu.Build.0 = Debug|Any CPU
+		{201004C2-D7AA-4EF0-B30C-280A28390613}.Release|anycpu.ActiveCfg = Release|Any CPU
+		{201004C2-D7AA-4EF0-B30C-280A28390613}.Release|anycpu.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
