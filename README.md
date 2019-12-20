@@ -1,6 +1,13 @@
 g MiniMessagePack
 simple and typeless MessagePack Reader for C#. 
 
+# References
+
+MiniMessagePack is inspired by MiniJSON[1] and MessagePack-CSharp[2].
+
+* [1] MiniJSON, https://gist.github.com/darktable/1411710
+* [2] MessagePack-CSharp, https://github.com/neuecc/MessagePack-CSharp
+
 # Concept
 
 * .NET Framework 3.5
