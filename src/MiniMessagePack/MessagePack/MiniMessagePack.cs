@@ -1,11 +1,19 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
+
 namespace MiniMessagePack
 {
-    public struct MsgPack
+    public partial struct MsgPack
     {
+        #region public
+        /// <summary>
+        /// MsgPack参照準備
+        /// Prepare to read MessagePack
+        /// </summary>
         public static MsgPack Deserialize(byte[] data)
         {
-            if(data == null || data.Length <= 0)
+            if (data == null || data.Length <= 0)
             {
                 throw new System.NullReferenceException();
             }
@@ -13,6 +21,10 @@ namespace MiniMessagePack
             return new MsgPack(data);
         }
 
+        /// <summary>
+        /// Mapであればkeyに該当するValueを指すMsgPackを取得
+        /// Get MsgPack which peek value of key.
+        /// </summary>
         public MsgPack this[string key]
         {
             get
@@ -22,6 +34,10 @@ namespace MiniMessagePack
             }
         }
 
+        /// <summary>
+        /// Arrayであればindexに該当するValueを指すMsgPackを取得
+        /// Get MsgPack which peek value of index.
+        /// </summary>
         public MsgPack this[int index]
         {
             get
@@ -31,21 +47,48 @@ namespace MiniMessagePack
             }
         }
 
-        public byte GetByte()
-        {
-            return _reader.GetByte();
-        }
+        public byte GetByte() { return _reader.GetByte(); }
+        public sbyte GetSByte() { return _reader.GetSByte(); }
+        public short GetShort() { return _reader.GetShort(); }
+        public ushort GetUShort() { return _reader.GetUShort(); }
+        public int GetInt() { return _reader.GetInt(); }
+        public uint GetUInt() { return _reader.GetUInt(); }
+        public long GetLong() { return _reader.GetLong(); }
+        public ulong GetULong() { return _reader.GetULong(); }
+        public float GetFloat() { return _reader.GetFloat(); }
+        public double GetDouble() { return _reader.GetDouble(); }
+        public bool GetBool() { return _reader.GetBool(); }
+        public string GetString() { return _reader.GetString(); }
+        public byte[] GetBinary() { return _reader.GetBinary(); }
+        public DateTime GetTimestamp() { return _reader.GetTimestamp(); }
+        public Extension GetExtension() { return _reader.GetExtension(); }
+        public byte GetFormatCode() { return _reader.Source[_reader.Position]; }
+        public string GetFormatName() { return Spec.GetFormatName(GetFormatCode()); }
+        #endregion //public
+    }
+
+    public class MiniMessagePackException : System.Exception
+    {
+        public MiniMessagePackException() { }
+        public MiniMessagePackException(string message) : base(message) { }
+    }
+
+    /// <summary>
+    /// messagePackPack Extension data
+    /// </summary>
+    public struct Extension
+    {
+        public sbyte TypeCode;
+        public byte[] Data;
+    }
+
+    public partial struct MsgPack
+    {
 
         MsgPackReader _reader;
         MsgPack(byte[] data, int position = 0)
         {
             _reader = new MsgPackReader(data, position);
-        }
-
-        public class MiniMessagePackException : System.Exception
-        {
-            public MiniMessagePackException() { }
-            public MiniMessagePackException(string message) : base(message) { }
         }
 
         struct MsgPackReader
@@ -57,6 +100,7 @@ namespace MiniMessagePack
             }
 
             public byte[] Source { get { return _source; } }
+
             public int Position { get { return _position; } }
 
             /// <summary>
@@ -112,10 +156,10 @@ namespace MiniMessagePack
             {
                 var reader = new SequencialReader(_source, _position);
 
-                var token = reader.ReadToken;
+                var token = reader.ReadToken();
                 if (!Spec.IsByte(token))
                 {
-                    throw new MiniMessagePackException(string.Format("failed to read byte. code : {0}", reader.token));
+                    throw new MiniMessagePackException(string.Format("failed to read byte. code : {0}", token));
                 }
                 return reader.ReadByte();
             }
@@ -124,7 +168,7 @@ namespace MiniMessagePack
             {
                 var reader = new SequencialReader(_source, _position);
 
-                var token = reader.ReadToken;
+                var token = reader.ReadToken();
                 if (!Spec.IsSByte(token))
                 {
                     throw new MiniMessagePackException(string.Format("failed to read sbyte. code : {0}", token));
@@ -136,7 +180,7 @@ namespace MiniMessagePack
             {
                 var reader = new SequencialReader(_source, _position);
 
-                var token = reader.ReadToken;
+                var token = reader.ReadToken();
                 if (!Spec.IsShort(token))
                 {
                     throw new MiniMessagePackException(string.Format("failed to read short. code : {0}", token));
@@ -144,11 +188,11 @@ namespace MiniMessagePack
                 return reader.ReadShort();
             }
 
-            public ushort GetShort()
+            public ushort GetUShort()
             {
                 var reader = new SequencialReader(_source, _position);
 
-                var token = reader.ReadToken;
+                var token = reader.ReadToken();
                 if (!Spec.IsUShort(token))
                 {
                     throw new MiniMessagePackException(string.Format("failed to read ushort. code : {0}", token));
@@ -160,7 +204,7 @@ namespace MiniMessagePack
             {
                 var reader = new SequencialReader(_source, _position);
 
-                var token = reader.ReadToken;
+                var token = reader.ReadToken();
                 if (!Spec.IsInt(token))
                 {
                     throw new MiniMessagePackException(string.Format("failed to read int. code : {0}", token));
@@ -172,7 +216,7 @@ namespace MiniMessagePack
             {
                 var reader = new SequencialReader(_source, _position);
 
-                var token = reader.ReadToken;
+                var token = reader.ReadToken();
                 if (!Spec.IsUInt(token))
                 {
                     throw new MiniMessagePackException(string.Format("failed to read uint. code : {0}", token));
@@ -184,7 +228,7 @@ namespace MiniMessagePack
             {
                 var reader = new SequencialReader(_source, _position);
 
-                var token = reader.ReadToken;
+                var token = reader.ReadToken();
                 if (!Spec.IsLong(token))
                 {
                     throw new MiniMessagePackException(string.Format("failed to read long. code : {0}", token));
@@ -196,7 +240,7 @@ namespace MiniMessagePack
             {
                 var reader = new SequencialReader(_source, _position);
 
-                var token = reader.ReadToken;
+                var token = reader.ReadToken();
                 if (!Spec.IsULong(token))
                 {
                     throw new MiniMessagePackException(string.Format("failed to read ulong. code : {0}", token));
@@ -208,7 +252,7 @@ namespace MiniMessagePack
             {
                 var reader = new SequencialReader(_source, _position);
 
-                var token = reader.ReadToken;
+                var token = reader.ReadToken();
                 if (!Spec.IsFloat(token))
                 {
                     throw new MiniMessagePackException(string.Format("failed to read float. code : {0}", token));
@@ -220,7 +264,7 @@ namespace MiniMessagePack
             {
                 var reader = new SequencialReader(_source, _position);
 
-                var token = reader.ReadToken;
+                var token = reader.ReadToken();
                 if (!Spec.IsDouble(token))
                 {
                     throw new MiniMessagePackException(string.Format("failed to read double. code : {0}", token));
@@ -255,12 +299,12 @@ namespace MiniMessagePack
                 return reader.ReadTimestamp(header);
             }
 
-            public System.Collections.Generic.KeyValuePair<sbyte, byte[]> GetExtension()
+            public Extension GetExtension()
             {
                 var reader = new SequencialReader(_source, _position);
                 var header = reader.ReadExtHeader();
                 var data = reader.ReadExtensionData(header);
-                return new System.Collections.Generic.KeyValuePair<sbyte, byte[]>(header.TypeCode, data);
+                return new Extension() { TypeCode = header.TypeCode, Data = data };
             }
 
             byte[] _source;
@@ -312,7 +356,7 @@ namespace MiniMessagePack
                 switch(sourceType)
                 {
                     case Spec.Type_Integer:
-                        token = ReadToken;
+                        token = ReadToken();
                         if(Spec.IsNegativeFixInt(token) || Spec.IsPositiveFixInt(token))
                         {
                             //nothing to do
@@ -339,7 +383,7 @@ namespace MiniMessagePack
                         ReadBoolean();
                         break;
                     case Spec.Type_Float:
-                        token = ReadToken;
+                        token = ReadToken();
                         if(token == Spec.Fmt_Float32)
                         {
                             ReadFloat();
@@ -386,11 +430,15 @@ namespace MiniMessagePack
                 }
             }
 
-            public void ReadNil()
+            public Nil ReadNil()
             {
                 byte code;
                 ThrowEndOfStreamExceptionUnless(TryRead(out code));
-                return (code == Spec.Fmt_Nil) ? Nil.Default : ThrowInvalidCodeException(code);
+                if (!Spec.IsNil(code))
+                {
+                    ThrowInvalidCodeException(code);
+                }
+                return Nil.Default;
             }
 
             public int ReadArrayElementCount()
@@ -434,6 +482,7 @@ namespace MiniMessagePack
                             return true;
                         }
                         ThrowInvalidCodeException(token);
+                        break;
                 }
 
                 count = default(int);
@@ -486,7 +535,7 @@ namespace MiniMessagePack
                 return true;
             }
 
-            public DateTime ReadTimestamp(ExtHeader header)
+            public DateTime ReadTimestamp(ExtensionHeader header)
             {
                 if(header.TypeCode != Spec.ExtTypeCode_Timestamp)
                 {
@@ -496,39 +545,42 @@ namespace MiniMessagePack
                 switch(header.Length)
                 {
                     case 4:
-                        uint uintResult;
-                        ThrowEndOfStreamExceptionUnless(TryReadBigEndian(out uintResult));
-                        return DateTimeConverter.GetDateTime(uintResult);
-                        break;
+                        {
+                            uint uintResult;
+                            ThrowEndOfStreamExceptionUnless(TryReadBigEndian(out uintResult));
+                            return DateTimeConverter.GetDateTime(uintResult);
+                        }
                     case 8:
-                        ulong ulongResult;
-                        ThrowEndOfStreamExceptionUnless(TryReadBigEndian(out ulongResult));
-                        uint nanoseconds = (ulongResult >> 34);
-                        uint seconds = (ulongResult & 0x00000003ffffffffL);
-                        return DateTimeConverter.GetDateTime(seconds, nanoseconds);
-                        break;
+                        {
+                            ulong ulongResult;
+                            ThrowEndOfStreamExceptionUnless(TryReadBigEndian(out ulongResult));
+                            uint nanoseconds = (uint)(ulongResult >> 34);
+                            uint seconds = (uint)(ulongResult & 0x00000003ffffffffL);
+                            return DateTimeConverter.GetDateTime(seconds, nanoseconds);
+                        }
                     case 12:
-                        uint uintResult;
-                        ThrowEndOfStreamExceptionUnless(TryReadBigEndian(out uintResult));
-                        ulong ulongResult;
-                        ThrowEndOfStreamExceptionUnless(TryReadBigEndian(out ulongResult));
-                        return DateTimeConverter.GetDateTime(ulongResult, uintResult);;
-                        break;
+                        {
+                            uint uintResult;
+                            ThrowEndOfStreamExceptionUnless(TryReadBigEndian(out uintResult));
+                            long longResult;
+                            ThrowEndOfStreamExceptionUnless(TryReadBigEndian(out longResult));
+                            return DateTimeConverter.GetDateTime(longResult, uintResult);
+                        }
                     default:
                         throw new MiniMessagePackException(string.Format("Invalid Ext Timestamp length {0}", header.Length));
                 }
             }
-            public byte[] ReadExtensionData(ExtHeader header)
+            public byte[] ReadExtensionData(ExtensionHeader header)
             {
                 byte[] data = new byte[header.Length];
                 Array.Copy(_source, _position, data, 0, header.Length);
                 return data;
             }
 
-            public ExtHeader ReadExtHeader()
+            public ExtensionHeader ReadExtHeader()
             {
-                var token = ReadToken;
-                uint length;
+                var token = ReadToken();
+                uint length = default(uint);
                 switch(token)
                 {
                     case Spec.Fmt_FixExt1:
@@ -539,7 +591,7 @@ namespace MiniMessagePack
                         break;
                     case Spec.Fmt_FixExt4:
                         length = 4;
-                        breakk;
+                        break;
                     case Spec.Fmt_FixExt8:
                         length = 8;
                         break;
@@ -552,23 +604,24 @@ namespace MiniMessagePack
                         length = byteResult;
                         break;
                     case Spec.Fmt_Ext16:
-                        short ushortResult;
+                        short shortResult;
                         ThrowEndOfStreamExceptionUnless(TryReadBigEndian(out shortResult));
-                        length = checked((uint)ushortResult);
+                        length = checked((uint)shortResult);
                         break;
                     case Spec.Fmt_Ext32:
-                        int uintResult;
+                        int intResult;
                         ThrowEndOfStreamExceptionUnless(TryReadBigEndian(out intResult));
-                        length = checked((uint)uintResult);
+                        length = checked((uint)intResult);
                         break;
                     default:
                         ThrowInvalidCodeException(token);
+                        break;
                 }
 
-                byte typeCode;
+                sbyte typeCode;
                 ThrowEndOfStreamExceptionUnless(TryRead(out typeCode));
 
-                return new ExtHeader(typeCode, length);
+                return new ExtensionHeader(typeCode, length);
             }
 
             public byte[] ReadBinary()
@@ -583,7 +636,7 @@ namespace MiniMessagePack
 
             int ReadBinaryByteLength()
             {
-                var token = ReadToken;
+                var token = ReadToken();
                 switch(token)
                 {
                     case Spec.Fmt_Bin8:
@@ -591,7 +644,7 @@ namespace MiniMessagePack
                         ThrowEndOfStreamExceptionUnless(TryRead(out byteResult));
                         return checked((int)byteResult);
                     case Spec.Fmt_Bin16:
-                        ushort ushortResult:
+                        ushort ushortResult;
                         ThrowEndOfStreamExceptionUnless(TryReadBigEndian(out ushortResult));
                         return checked((int)ushortResult);
                     case Spec.Fmt_Bin32:
@@ -602,6 +655,8 @@ namespace MiniMessagePack
                         ThrowInvalidCodeException(token);
                         break;
                 }
+
+                return default(int);
             }
 
             public string ReadString()
@@ -638,6 +693,8 @@ namespace MiniMessagePack
                         ThrowInvalidCodeException(token);
                         break;
                 }
+
+                return default(int);
             }
 
             public bool ReadBoolean()
@@ -879,7 +936,7 @@ namespace MiniMessagePack
                 return false;
             }
 
-            bool TryRaedReverseBit(out int value)
+            bool TryReadReverseBit(out int value)
             {
                 if(TryRead(out value))
                 {
@@ -896,7 +953,7 @@ namespace MiniMessagePack
                 if(TryRead(out tmp))
                 {
                     value = unchecked((uint)BitReverse(tmp));
-                    ref true;
+                    return true;
                 }
 
                 value = default(uint);
@@ -923,6 +980,8 @@ namespace MiniMessagePack
                     value = unchecked((ulong)BitReverse(tmp));
                     return true;
                 }
+
+                value = default(ulong);
                 return false;
             }
 
@@ -961,14 +1020,15 @@ namespace MiniMessagePack
 
             bool TryRead<T>(out T value)
             {
-                if ((_source.Length - _position) < sizeof(T))
+                var typeSize = TypeSizeProvider.Instance.Get<T>();
+                if ((_source.Length - _position) < typeSize)
                 {
                     value = default(T);
                     return false;
                 }
 
-                value = BinaryConverter<T>.Func.Invoke(_source, _position);
-                _position += sizeof(T);
+                value = BytesConverterResolver.Instance.GetConverter<T>().To(_source, _position);
+                _position += typeSize;
                 return true;
             }
 
@@ -990,7 +1050,7 @@ namespace MiniMessagePack
                         (((value >>  8) & 0xff) << 16) |
                         (((value >> 16) & 0xff) <<  8) |
                          ((value >> 24) & 0xff)
-                    );
+                    )
                 );
             }
 
@@ -998,15 +1058,15 @@ namespace MiniMessagePack
             {
                 return unchecked(
                     (long)(
-                        ((value & 0xff)         << 56) |
-                        (((value >>  8) & 0xff) << 48) |
+                        ((value & 0xff) << 56) |
+                        (((value >> 8) & 0xff) << 48) |
                         (((value >> 16) & 0xff) << 40) |
                         (((value >> 24) & 0xff) << 32) |
                         (((value >> 34) & 0xff) << 24) |
                         (((value >> 40) & 0xff) << 16) |
-                        (((value >> 48) & 0xff) <<  8) |
+                        (((value >> 48) & 0xff) << 8) |
                          ((value >> 56) & 0xff)
-                    );
+                    )
                 );
             }
 
@@ -1030,18 +1090,18 @@ namespace MiniMessagePack
             #endregion //private
         }
 
-        struct ExtHeader
+        struct ExtensionHeader
         {
             public sbyte TypeCode { get; private set; }
             public uint Length { get; private set; }
 
-            public ExtHeader(sbyte typeCode, uint length)
+            public ExtensionHeader(sbyte typeCode, uint length)
             {
                 TypeCode = typeCode;
                 Length = length;
             }
 
-            public ExtHeader(sbyte typeCode, int length)
+            public ExtensionHeader(sbyte typeCode, int length)
             {
                 TypeCode = typeCode;
                 Length = (uint)length;
@@ -1069,56 +1129,107 @@ namespace MiniMessagePack
             }
         }
 
-        static class BinaryConverter<T> where T
+        /// <summary>
+        /// primitive型のサイズを返す
+        /// provide size of type
+        /// </summary>
+        class TypeSizeProvider
         {
-            public delegate T ConvertFunc(byte[] data, int startIndex);
-            public static ConvertFunc Func { get; private set; }
-            static BinaryConverter()
+            public static readonly TypeSizeProvider Instance = new TypeSizeProvider();
+            public int Get<T>()
             {
-                if(T is typeof(byte))
-                {
-                    Func = (byte[] data, int startIndex) => data[startIndex];
-                }
-                else if (T is typeof(sbyte))
-                {
-                    Func = (byte[] data, int startIndex) => unchecked((sbyte)data[startIndex]);
-                }
-                else if (T is typeof(short))
-                {
-                    Func = (byte[] data, int startIndex) => BitConverter.ToInt16(data, startIndex);
-                }
-                else if(T is typeof(ushort))
-                {
-                    Func = (byte[] data, int startIndex) => BitConverter.ToUInt16(data, startIndex);
-                }
-                else if(T is typeof(int))
-                {
-                    Func = (byte[] data, int startIndex) => BitConverter.ToInt32(data, startIndex);
-                }
-                else if (T is typeof(uint))
-                {
-                    Func = (byte[] data, int startIndex) => BitConverter.ToUInt32(data, startIndex);
-                }
-                else if (T is typeof(long))
-                {
-                    Func = (byte[] data, int startIndex) => BitConverter.ToInt64(data, startIndex);
-                }
-                else if (T is typeof(ulong))
-                {
-                    Func = (byte[] data, int startIndex) => BitConverter.ToUInt64(data, startIndex);
-                }
-                else if (T is typeof(float))
-                {
-                    Func = (byte[] data, int startIndex) => BitConverter.ToSingle(data, startIndex);
-                }
-                else if(T is typeof(float))
-                {
-                    Func = (byte[] data, int startIndex) => BitConverter.ToDouble(data, startIndex);
-                }
+                return Cache<T>.Size;
+            }
 
-                throw new MiniMessagePackException("BitConverter Invalid Type Assign : " + typeof(T).Name);
+            TypeSizeProvider() { }
+
+            static class Cache<T>
+            {
+                public static readonly int Size;
+                static Cache()
+                {
+                    Size = TypeSizeProviderCacheHelper.ToSize(typeof(T));
+                }
+            }
+
+            static class TypeSizeProviderCacheHelper
+            {
+                public static int ToSize(Type type) { return TypeSizeMap[type]; }
+
+                static readonly Dictionary<Type, int> TypeSizeMap = new Dictionary<Type, int>()
+                {
+                    { typeof(byte), sizeof(byte) },
+                    { typeof(sbyte), sizeof(sbyte) },
+                    { typeof(short), sizeof(short) },
+                    { typeof(ushort), sizeof(ushort) },
+                    { typeof(int), sizeof(int) },
+                    { typeof(uint), sizeof(uint) },
+                    { typeof(long), sizeof(long) },
+                    { typeof(ulong), sizeof(ulong) },
+                    { typeof(float), sizeof(float) },
+                    { typeof(double), sizeof(double) },
+                };
             }
         }
+
+        /// <summary>
+        /// 型引数に応じたbyte列->型変換処理
+        /// </summary>
+        interface IBytesConverter<T> 
+        {
+            T To(byte[] data, int startIndex);
+        }
+        class BytesConverterResolver
+        {
+            public static readonly BytesConverterResolver Instance = new BytesConverterResolver();
+            public IBytesConverter<T> GetConverter<T>()
+            {
+                return Cache<T>.converter;
+            }
+
+            BytesConverterResolver() { }
+
+            static class Cache<T>
+            {
+                public static readonly IBytesConverter<T> converter;
+                static Cache()
+                {
+                    converter = (IBytesConverter<T>)BytesConverterResolverCacheHelper.ToConverter(typeof(T));
+                }
+            }
+
+            static class BytesConverterResolverCacheHelper
+            {
+                public static object ToConverter(Type type) { return ConverterMap[type]; }
+
+                static readonly Dictionary<Type, object> ConverterMap = new Dictionary<Type, object>()
+                {
+                    { typeof(byte), new ByteConverter() },
+                    { typeof(sbyte), new SByteConverter() },
+                    { typeof(short), new ShortConverter() },
+                    { typeof(ushort), new UShortConverter() },
+                    { typeof(int), new IntConverter() },
+                    { typeof(uint), new UIntConverter() },
+                    { typeof(long), new LongConverter() },
+                    { typeof(ulong), new ULongConverter() },
+                    { typeof(float), new FloatConverter() },
+                    { typeof(double), new DoubleConverter() },
+                };
+            }
+
+            class ByteConverter  : IBytesConverter<byte>  { public byte To(byte[] data, int startIndex) { return data[startIndex]; } }
+            class SByteConverter : IBytesConverter<sbyte> { public sbyte To(byte[] data, int startIndex){ return unchecked((sbyte)data[startIndex]); } }
+            class ShortConverter : IBytesConverter<short> { public short To(byte[] data, int startIndex){ return BitConverter.ToInt16(data, startIndex); } }
+            class UShortConverter : IBytesConverter<ushort> { public ushort To(byte[] data, int startIndex) { return BitConverter.ToUInt16(data, startIndex); } }
+            class IntConverter : IBytesConverter<int> { public int To(byte[] data, int startIndex) { return BitConverter.ToInt32(data, startIndex); } }
+            class UIntConverter : IBytesConverter<uint> { public uint To(byte[] data, int startIndex) { return BitConverter.ToUInt32(data, startIndex); } }
+            class LongConverter : IBytesConverter<long> { public long To(byte[] data, int startIndex) { return BitConverter.ToInt64(data, startIndex); } }
+            class ULongConverter : IBytesConverter<ulong> { public ulong To(byte[] data, int startIndex) { return BitConverter.ToUInt64(data, startIndex); } }
+            class FloatConverter : IBytesConverter<float> { public float To(byte[] data, int startIndex) { return BitConverter.ToSingle(data, startIndex); } }
+            class DoubleConverter : IBytesConverter<double> { public double To(byte[] data, int startIndex) { return BitConverter.ToDouble(data, startIndex); } }
+        }
+
+
 
         struct Nil : IEquatable<Nil>
         {
@@ -1272,7 +1383,7 @@ namespace MiniMessagePack
             }
             public static bool IsULong(byte token)
             {
-                return (token == Fmt_UInt64);
+                return (token == Fmt_Uint64);
             }
             public static bool IsFloat(byte token)
             {
@@ -1280,7 +1391,7 @@ namespace MiniMessagePack
             }
             public static bool IsDouble(byte token)
             {
-                return (tokenn == Fmt_Float64);
+                return (token == Fmt_Float64);
             }
             public static bool IsString(byte token)
             {
@@ -1349,7 +1460,6 @@ namespace MiniMessagePack
             {
                 return (token == Fmt_Nil);
             }
-
 
             #region Type lookup tables
             private static readonly byte[] _typeLookupTable = new byte[0xff];
