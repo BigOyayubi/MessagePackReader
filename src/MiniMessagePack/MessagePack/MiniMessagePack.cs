@@ -165,7 +165,7 @@ namespace MiniMessagePack
                     default:
                         if(Spec.IsPositiveFixInt(token))
                         {
-                            return unchecked((byte)token);
+                            return token;
                         }
                         throw new MiniMessagePackException(string.Format("failed to read byte. code : {0:X}", token));
                 }
@@ -178,12 +178,15 @@ namespace MiniMessagePack
                 var token = reader.ReadToken();
                 switch(token)
                 {
+                    case Spec.Fmt_Uint8:
+                        byte byteResult = reader.ReadByte();
+                        return unchecked((sbyte)byteResult);
                     case Spec.Fmt_Int8:
                         return reader.ReadSByte();
                     default:
                         if(Spec.IsPositiveFixInt(token))
                         {
-                            return checked((sbyte)token);
+                            return unchecked((sbyte)token);
                         }
                         else if(Spec.IsNegativeFixInt(token))
                         {
@@ -198,11 +201,26 @@ namespace MiniMessagePack
                 var reader = new SequencialReader(_source, _position);
 
                 var token = reader.ReadToken();
-                if (!Spec.IsShort(token))
+
+                switch(token)
                 {
-                    throw new MiniMessagePackException(string.Format("failed to read short. code : {0}", token));
+                    case Spec.Fmt_Uint8:
+                        return reader.ReadByte();
+                    case Spec.Fmt_Int8:
+                        return reader.ReadSByte();
+                    case Spec.Fmt_Int16:
+                        return reader.ReadShort();
+                    default:
+                        if (Spec.IsPositiveFixInt(token))
+                        {
+                            return token;
+                        }
+                        else if (Spec.IsNegativeFixInt(token))
+                        {
+                            return unchecked((sbyte)token);
+                        }
+                        throw new MiniMessagePackException(string.Format("failed to read short. code : {0:X}", token));
                 }
-                return reader.ReadShort();
             }
 
             public ushort GetUShort()
@@ -210,11 +228,19 @@ namespace MiniMessagePack
                 var reader = new SequencialReader(_source, _position);
 
                 var token = reader.ReadToken();
-                if (!Spec.IsUShort(token))
+                switch(token)
                 {
-                    throw new MiniMessagePackException(string.Format("failed to read ushort. code : {0}", token));
+                    case Spec.Fmt_Uint8:
+                        return reader.ReadByte();
+                    case Spec.Fmt_Uint16:
+                        return reader.ReadUShort();
+                    default:
+                        if(Spec.IsPositiveFixInt(token))
+                        {
+                            return token;
+                        }
+                        throw new MiniMessagePackException(string.Format("failed to read ushort. code : {0}", token));
                 }
-                return reader.ReadUShort();
             }
 
             public int GetInt()
@@ -222,11 +248,29 @@ namespace MiniMessagePack
                 var reader = new SequencialReader(_source, _position);
 
                 var token = reader.ReadToken();
-                if (!Spec.IsInt(token))
+                switch(token)
                 {
-                    throw new MiniMessagePackException(string.Format("failed to read int. code : {0}", token));
+                    case Spec.Fmt_Uint8:
+                        return reader.ReadByte();
+                    case Spec.Fmt_Int8:
+                        return reader.ReadSByte();
+                    case Spec.Fmt_Uint16:
+                        return reader.ReadUShort();
+                    case Spec.Fmt_Int16:
+                        return reader.ReadShort();
+                    case Spec.Fmt_Int32:
+                        return reader.ReadInt();
+                    default:
+                        if (Spec.IsPositiveFixInt(token))
+                        {
+                            return token;
+                        }
+                        else if (Spec.IsNegativeFixInt(token))
+                        {
+                            return unchecked((sbyte)token);
+                        }
+                        throw new MiniMessagePackException(string.Format("failed to read int. code : {0}", token));
                 }
-                return reader.ReadInt();
             }
 
             public uint GetUInt()
@@ -234,11 +278,21 @@ namespace MiniMessagePack
                 var reader = new SequencialReader(_source, _position);
 
                 var token = reader.ReadToken();
-                if (!Spec.IsUInt(token))
+                switch (token)
                 {
-                    throw new MiniMessagePackException(string.Format("failed to read uint. code : {0}", token));
+                    case Spec.Fmt_Uint8:
+                        return reader.ReadByte();
+                    case Spec.Fmt_Uint16:
+                        return reader.ReadUShort();
+                    case Spec.Fmt_Uint32:
+                        return reader.ReadUInt();
+                    default:
+                        if (Spec.IsPositiveFixInt(token))
+                        {
+                            return token;
+                        }
+                        throw new MiniMessagePackException(string.Format("failed to read uint. code : {0:X}", token));
                 }
-                return reader.ReadUInt();
             }
 
             public long GetLong()
@@ -246,11 +300,34 @@ namespace MiniMessagePack
                 var reader = new SequencialReader(_source, _position);
 
                 var token = reader.ReadToken();
-                if (!Spec.IsLong(token))
+
+                switch (token)
                 {
-                    throw new MiniMessagePackException(string.Format("failed to read long. code : {0}", token));
+                    case Spec.Fmt_Uint8:
+                        return reader.ReadByte();
+                    case Spec.Fmt_Int8:
+                        return reader.ReadSByte();
+                    case Spec.Fmt_Uint16:
+                        return reader.ReadUShort();
+                    case Spec.Fmt_Int16:
+                        return reader.ReadShort();
+                    case Spec.Fmt_Int32:
+                        return reader.ReadInt();
+                    case Spec.Fmt_Uint32:
+                        return reader.ReadUInt();
+                    case Spec.Fmt_Int64:
+                        return reader.ReadLong();
+                    default:
+                        if (Spec.IsPositiveFixInt(token))
+                        {
+                            return token;
+                        }
+                        else if (Spec.IsNegativeFixInt(token))
+                        {
+                            return unchecked((sbyte)token);
+                        }
+                        throw new MiniMessagePackException(string.Format("failed to read long. code : {0:X}", token));
                 }
-                return reader.ReadLong();
             }
 
             public ulong GetULong()
@@ -258,11 +335,23 @@ namespace MiniMessagePack
                 var reader = new SequencialReader(_source, _position);
 
                 var token = reader.ReadToken();
-                if (!Spec.IsULong(token))
+                switch (token)
                 {
-                    throw new MiniMessagePackException(string.Format("failed to read ulong. code : {0}", token));
+                    case Spec.Fmt_Uint8:
+                        return reader.ReadByte();
+                    case Spec.Fmt_Uint16:
+                        return reader.ReadUShort();
+                    case Spec.Fmt_Uint32:
+                        return reader.ReadUInt();
+                    case Spec.Fmt_Uint64:
+                        return reader.ReadULong();
+                    default:
+                        if (Spec.IsPositiveFixInt(token))
+                        {
+                            return token;
+                        }
+                        throw new MiniMessagePackException(string.Format("failed to read ulong. code : {0:X}", token));
                 }
-                return reader.ReadULong();
             }
 
             public float GetFloat()
@@ -282,11 +371,17 @@ namespace MiniMessagePack
                 var reader = new SequencialReader(_source, _position);
 
                 var token = reader.ReadToken();
-                if (!Spec.IsDouble(token))
+
+                switch(token)
                 {
-                    throw new MiniMessagePackException(string.Format("failed to read double. code : {0}", token));
+                    case Spec.Fmt_Float32:
+                        return reader.ReadFloat();
+                    case Spec.Fmt_Float64:
+                        return reader.ReadDouble();
+                    default:
+                        throw new MiniMessagePackException(string.Format("failed to read double. code : {0:X}", token));
+
                 }
-                return reader.ReadDouble();
             }
 
             public Nil GetNil()
@@ -377,22 +472,27 @@ namespace MiniMessagePack
                         if(Spec.IsNegativeFixInt(token) || Spec.IsPositiveFixInt(token))
                         {
                             //nothing to do
+                            return;
                         }
                         else if(token == Spec.Fmt_Int8 || token == Spec.Fmt_Uint8)
                         {
                             ReadSByte();
+                            return;
                         }
                         else if(token == Spec.Fmt_Int16 || token == Spec.Fmt_Uint16)
                         {
                             ReadShort();
+                            return;
                         }
                         else if(token == Spec.Fmt_Int32 || token == Spec.Fmt_Uint32)
                         {
                             ReadInt();
+                            return;
                         }
                         else if(token == Spec.Fmt_Int64 || token == Spec.Fmt_Uint64)
                         {
                             ReadLong();
+                            return;
                         }
 
                         throw new MiniMessagePackException("Invalid primitive bytes.");
@@ -404,24 +504,27 @@ namespace MiniMessagePack
                         if(token == Spec.Fmt_Float32)
                         {
                             ReadFloat();
+                            return;
                         }
                         else
                         {
                             ReadDouble();
+                            return;
                         }
 
                         throw new MiniMessagePackException("Invalid primitive bytes.");
                     case Spec.Type_String:
                         ReadString();
-                        break;
+                        return;
                     case Spec.Type_Binary:
                         ReadBinary();
-                        break;
+                        return;
                     case Spec.Type_Extension:
                         var extHeader = ReadExtHeader();
                         if(extHeader.TypeCode == Spec.ExtTypeCode_Timestamp)
                         {
                             ReadTimestamp(extHeader);
+                            return;
                         }
                         throw new MiniMessagePackException("Invalid primitive bytes.");
                     case Spec.Type_Array:
@@ -430,7 +533,7 @@ namespace MiniMessagePack
                         {
                             SkipElement();
                         }
-                        break;
+                        return;
                     case Spec.Type_Map:
                         var mapElementCount = ReadMapElementCount();
                         for(int i = 0; i < mapElementCount; i++)
@@ -438,10 +541,10 @@ namespace MiniMessagePack
                             ReadString();
                             SkipElement();
                         }
-                        break;
+                        return;
                     case Spec.Type_Nil:
                         ReadNil();
-                        break;
+                        return;
                     default:
                         throw new MiniMessagePackException("Invalid primitive bytes.");
                 }
@@ -495,7 +598,7 @@ namespace MiniMessagePack
                     default:
                         if(Spec.IsFixArray(token))
                         {
-                            count = checked((byte)(token & 0xff));
+                            count = checked((byte)(token & 0xf));
                             return true;
                         }
                         ThrowInvalidCodeException(token);
@@ -1009,12 +1112,8 @@ namespace MiniMessagePack
                 if(TryRead(out tmp))
                 {
                     var bytes = BitConverter.GetBytes(tmp);
-                    byte b = bytes[3];
-                    bytes[3] = bytes[0];
-                    bytes[0] = b;
-                    b = bytes[2];
-                    bytes[2] = bytes[1];
-                    bytes[1] = b;
+                    ByteSwap(bytes, 0, 3);
+                    ByteSwap(bytes, 1, 2);
                     value = BitConverter.ToSingle(bytes, 0);
                     return true;
                 }
@@ -1028,7 +1127,17 @@ namespace MiniMessagePack
                 long tmp;
                 if(TryRead(out tmp))
                 {
-                    value = BitConverter.Int64BitsToDouble(tmp);
+#if false
+                    //float.MinValueが渡されると失敗する
+                    value = BitConverter.Int64BitsToDouble(BitReverse(tmp));
+#else
+                    var bytes = BitConverter.GetBytes(tmp);
+                    ByteSwap(bytes, 0, 7);
+                    ByteSwap(bytes, 1, 6);
+                    ByteSwap(bytes, 2, 5);
+                    ByteSwap(bytes, 3, 4);
+                    value = BitConverter.ToDouble(bytes, 0);
+#endif
                     return true;
                 }
                 value = default(double);
@@ -1048,6 +1157,13 @@ namespace MiniMessagePack
                 _position += typeSize;
                 return true;
             }
+
+            void ByteSwap(byte[] data, int idx1, int idx2)
+            {
+                byte tmp = data[idx1];
+                data[idx1] = data[idx2];
+                data[idx2] = tmp;
+            }               
 
             short BitReverse(short value)
             {
@@ -1104,7 +1220,7 @@ namespace MiniMessagePack
                     ThrowEndOfStreamException();
                 }
             }
-            #endregion //private
+#endregion //private
         }
 
         struct ExtensionHeader
@@ -1275,7 +1391,7 @@ namespace MiniMessagePack
 
         static class Spec
         {
-            #region Output formats
+#region Output formats
             public const byte Fmt_MinPositiveFixInt = 0x00;
             public const byte Fmt_MaxPositiveFixInt = 0x7f;
             public const byte Fmt_MinFixMap = 0x80;
@@ -1318,9 +1434,9 @@ namespace MiniMessagePack
             public const byte Fmt_Map32 = 0xdf;
             public const byte Fmt_MinNegativeFixInt = 0xe0;
             public const byte Fmt_MaxNegativeFixInt = 0xff;
-            #endregion //Output formats
+#endregion //Output formats
 
-            #region Source Types
+#region Source Types
             public const byte Type_Unknown = 0;
             public const byte Type_Integer = 1;
             public const byte Type_Nil = 2;
@@ -1331,11 +1447,11 @@ namespace MiniMessagePack
             public const byte Type_Array = 7;
             public const byte Type_Map = 8;
             public const byte Type_Extension = 9;
-            #endregion //Source Types
+#endregion //Source Types
 
-            #region Reserved Ext TypeCode
+#region Reserved Ext TypeCode
             public const sbyte ExtTypeCode_Timestamp = -1;
-            #endregion //Reserved Ext TypeCode
+#endregion //Reserved Ext TypeCode
 
             public static byte GetSourceType(byte token)
             {
@@ -1478,10 +1594,10 @@ namespace MiniMessagePack
                 return (token == Fmt_Nil);
             }
 
-            #region Type lookup tables
+#region Type lookup tables
             private static readonly byte[] _typeLookupTable = new byte[0xff+1];
             private static readonly string[] _fmtNameLookupTable = new string[0xff+1];
-            #endregion //Type lookup tables
+#endregion //Type lookup tables
 
             static Spec()
             {
