@@ -15,3 +15,18 @@ simple and typeless MessagePack Reader for C#.
     * if you want to serialize some data to messagepack,<br>
       I recommend to use other MessagePack libs. like MesaagePack-Cli, MessagePack-CSharp
 
+# QuickStart
+
+* Copy src/MiniMessagePack/MessagePack/MiniMessagePack.cs to your project
+
+```
+  byte[] msgpack;
+  var reader = MiniMessagePack.MsgPack.Deserialize(msgpack);
+  byte b = reader["a"][0].GetByte();
+  string s = reader["b"].GetString();
+```
+
+# TODO
+
+* Profile
+    * is it right? : MiniMessagePack.MsgPack is "struct"
