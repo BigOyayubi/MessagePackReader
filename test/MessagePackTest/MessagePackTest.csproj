@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="..\..\src\MiniMessagePack\packages\NUnit.3.12.0\build\NUnit.props" Condition="Exists('..\..\src\MiniMessagePack\packages\NUnit.3.12.0\build\NUnit.props')" />
   <PropertyGroup>
@@ -24,9 +24,9 @@
     <LangVersion>4</LangVersion>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\src\MiniMessagePack\MessagePack\MessagePack.csproj">
+    <ProjectReference Include="..\..\src\MiniMessagePack\MessagePack\MiniMessagePack.csproj">
       <Project>{201004C2-D7AA-4EF0-B30C-280A28390613}</Project>
-      <Name>MessagePack</Name>
+      <Name>MiniMessagePack</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

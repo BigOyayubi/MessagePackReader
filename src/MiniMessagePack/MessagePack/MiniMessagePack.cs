@@ -4,33 +4,42 @@ using System.Collections.Generic;
 
 namespace MiniMessagePack
 {
-    public partial struct MsgPack
+    public partial struct Reader
     {
         #region public
         /// <summary>
         /// MsgPack参照準備
         /// Prepare to read MessagePack
         /// </summary>
-        public static MsgPack Deserialize(byte[] data)
+        public static Reader Deserialize(byte[] data)
         {
             if (data == null || data.Length <= 0)
             {
                 throw new System.NullReferenceException();
             }
 
-            return new MsgPack(data);
+            return new Reader(data);
         }
 
         /// <summary>
         /// Mapであればkeyに該当するValueを指すMsgPackを取得
         /// Get MsgPack which peek value of key.
         /// </summary>
-        public MsgPack this[string key]
+        public Reader this[string key]
         {
             get
             {
-                int mapValuePosition = _reader.GetMapValuePosition(key);
-                return new MsgPack(_reader.Source, mapValuePosition);
+                var binkey = System.Text.Encoding.UTF8.GetBytes(key);
+                int mapValuePosition = _reader.GetMapValuePosition(binkey);
+                return new Reader(_reader.Source, mapValuePosition);
+            }
+        }
+
+        public int ArrayLength
+        {
+            get
+            {
+                return _reader.GetArrayLength();
             }
         }
 
@@ -38,12 +47,12 @@ namespace MiniMessagePack
         /// Arrayであればindexに該当するValueを指すMsgPackを取得
         /// Get MsgPack which peek value of index.
         /// </summary>
-        public MsgPack this[int index]
+        public Reader this[int index]
         {
             get
             {
                 int arrayElementPosition = _reader.GetArrayElementPosition(index);
-                return new MsgPack(_reader.Source, arrayElementPosition);
+                return new Reader(_reader.Source, arrayElementPosition);
             }
         }
 
@@ -82,18 +91,23 @@ namespace MiniMessagePack
         public byte[] Data;
     }
 
-    public partial struct MsgPack
+    public partial struct Reader
     {
-
-        MsgPackReader _reader;
-        MsgPack(byte[] data, int position = 0)
+        readonly MsgpackReader _reader;
+        Reader(byte[] data, int position = 0)
         {
-            _reader = new MsgPackReader(data, position);
+            _reader = new MsgpackReader(data, position);
         }
 
-        struct MsgPackReader
+        struct MsgpackReader
         {
-            public MsgPackReader(byte[] data, int position = 0)
+            public MsgpackReader(byte[] data, int position = 0)
+            {
+                _source = data;
+                _position = position;
+            }
+
+            public void Reset(byte[] data, int position)
             {
                 _source = data;
                 _position = position;
@@ -102,6 +116,16 @@ namespace MiniMessagePack
             public byte[] Source { get { return _source; } }
 
             public int Position { get { return _position; } }
+
+            /// <summary>
+            /// Seek位置がArrayであれば、Element数を返す
+            /// </summary>
+            /// <returns></returns>
+            public int GetArrayLength()
+            {
+                var reader = new SequencialReader(_source, _position);
+                return reader.ReadArrayElementCount();
+            }
 
             /// <summary>
             /// Seek位置がArrayであれば、該当indexのElement位置を返す
@@ -149,7 +173,23 @@ namespace MiniMessagePack
                 }
 
                 // not found key
-                throw new MiniMessagePackException(string.Format("not found key {0:X}", key));
+                throw new MiniMessagePackException(string.Format("not found key {0}", key));
+            }
+            public int GetMapValuePosition(byte[] key)
+            {
+                var reader = new SequencialReader(_source, _position);
+
+                int mapElementCount = reader.ReadMapElementCount();
+                for(int i = 0; i < mapElementCount; i++)
+                {
+                    if(reader.CompareAndReadString(key))
+                    {
+                        return reader.Position;
+                    }
+                    reader.SkipElement();
+                }
+                // not found key
+                throw new MiniMessagePackException(string.Format("not found key {0}", key));
             }
 
             public byte GetByte()
@@ -425,7 +465,7 @@ namespace MiniMessagePack
 
         struct SequencialReader
         {
-            byte[] _source;
+            readonly byte[] _source;
             int _position;
 
             public SequencialReader(byte[] source, int position)
@@ -476,56 +516,68 @@ namespace MiniMessagePack
                         }
                         else if(token == Spec.Fmt_Int8 || token == Spec.Fmt_Uint8)
                         {
-                            ReadSByte();
+                            _position += sizeof(byte);
+//                            ReadSByte();
                             return;
                         }
                         else if(token == Spec.Fmt_Int16 || token == Spec.Fmt_Uint16)
                         {
-                            ReadShort();
+                            _position += sizeof(short);
+//                            ReadShort();
                             return;
                         }
                         else if(token == Spec.Fmt_Int32 || token == Spec.Fmt_Uint32)
                         {
-                            ReadInt();
+                            _position += sizeof(int);
+//                            ReadInt();
                             return;
                         }
                         else if(token == Spec.Fmt_Int64 || token == Spec.Fmt_Uint64)
                         {
-                            ReadLong();
+                            _position += sizeof(long);
+//                            ReadLong();
                             return;
                         }
 
                         throw new MiniMessagePackException("Invalid primitive bytes.");
                     case Spec.Type_Boolean:
-                        ReadBoolean();
+                        token = ReadToken();
+//                        ReadBoolean();
                         break;
                     case Spec.Type_Float:
                         token = ReadToken();
                         if(token == Spec.Fmt_Float32)
                         {
-                            ReadFloat();
+                            _position += sizeof(float);
+//                            ReadFloat();
                             return;
                         }
                         else
                         {
-                            ReadDouble();
+                            _position += sizeof(double);
+//                            ReadDouble();
                             return;
                         }
 
                         throw new MiniMessagePackException("Invalid primitive bytes.");
                     case Spec.Type_String:
-                        ReadString();
+                        var stringLength = ReadStringByteLength();
+                        _position += stringLength;
+//                        ReadString();
                         return;
                     case Spec.Type_Binary:
-                        ReadBinary();
+                        var byteLength = ReadBinaryByteLength();
+                        _position += byteLength;
+//                        ReadBinary();
                         return;
                     case Spec.Type_Extension:
                         var extHeader = ReadExtHeader();
-                        if(extHeader.TypeCode == Spec.ExtTypeCode_Timestamp)
-                        {
-                            ReadTimestamp(extHeader);
-                            return;
-                        }
+                        _position += (int)extHeader.Length;
+//                        if(extHeader.TypeCode == Spec.ExtTypeCode_Timestamp)
+//                        {
+//                            ReadTimestamp(extHeader);
+//                            return;
+//                        }
                         throw new MiniMessagePackException("Invalid primitive bytes.");
                     case Spec.Type_Array:
                         var arrayElementCount = ReadArrayElementCount();
@@ -538,8 +590,9 @@ namespace MiniMessagePack
                         var mapElementCount = ReadMapElementCount();
                         for(int i = 0; i < mapElementCount; i++)
                         {
-                            ReadString();
-                            SkipElement();
+//                            ReadString();
+                            SkipElement();//key
+                            SkipElement();//value
                         }
                         return;
                     case Spec.Type_Nil:
@@ -779,8 +832,41 @@ namespace MiniMessagePack
                 return default(int);
             }
 
+            public bool CompareAndReadString(byte[] key)
+            {
+                var token = PeekToken;
+                if (token == Spec.Fmt_Nil)
+                {
+                    return false;
+                }
+
+                var byteLength = ReadStringByteLength();
+                if(byteLength != key.Length)
+                {
+                    _position += byteLength;
+                    return false;
+                }
+                for(int i = 0; i < byteLength; i++)
+                {
+                    if(_source[_position+i] != key[i])
+                    {
+                        _position += byteLength;
+                        return false;
+                    }
+                }
+
+                _position += byteLength;
+                return true;
+            }
+
             public string ReadString()
             {
+                var token = PeekToken;
+                if(token == Spec.Fmt_Nil)
+                {
+                    return "";
+                }
+
                 var byteLength = ReadStringByteLength();
 
                 var value = System.Text.Encoding.UTF8.GetString(_source, _position, byteLength);
@@ -1163,7 +1249,7 @@ namespace MiniMessagePack
                 byte tmp = data[idx1];
                 data[idx1] = data[idx2];
                 data[idx2] = tmp;
-            }               
+            }
 
             short BitReverse(short value)
             {
@@ -1205,7 +1291,7 @@ namespace MiniMessagePack
 
             MiniMessagePackException ThrowInvalidCodeException(byte code)
             {
-                throw new MiniMessagePackException(string.Format("Invalid code {0}", code));
+                throw new MiniMessagePackException(string.Format("Invalid code 0x{0:X}", code));
             }
 
             System.IO.EndOfStreamException ThrowEndOfStreamException()
@@ -1308,7 +1394,7 @@ namespace MiniMessagePack
         /// <summary>
         /// 型引数に応じたbyte列->型変換処理
         /// </summary>
-        interface IBytesConverter<T> 
+        interface IBytesConverter<T>
         {
             T To(byte[] data, int startIndex);
         }
