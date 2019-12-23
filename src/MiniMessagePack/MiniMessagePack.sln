@@ -5,6 +5,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MessagePack", "MessagePack\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MessagePackTest", "..\..\test\MessagePackTest\MessagePackTest.csproj", "{CDA477E1-463F-422C-B2C5-AF33B0DD7D0C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MessagePackProfile", "..\..\test\MessagePackProfile\MessagePackProfile.csproj", "{10004901-31CA-437E-BDB7-8C41EA82F756}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|anycpu = Debug|anycpu
@@ -19,5 +21,9 @@ Global
 		{CDA477E1-463F-422C-B2C5-AF33B0DD7D0C}.Debug|anycpu.Build.0 = Debug|anycpu
 		{CDA477E1-463F-422C-B2C5-AF33B0DD7D0C}.Release|anycpu.ActiveCfg = Release|anycpu
 		{CDA477E1-463F-422C-B2C5-AF33B0DD7D0C}.Release|anycpu.Build.0 = Release|anycpu
+		{10004901-31CA-437E-BDB7-8C41EA82F756}.Debug|anycpu.ActiveCfg = Debug|anycpu
+		{10004901-31CA-437E-BDB7-8C41EA82F756}.Debug|anycpu.Build.0 = Debug|anycpu
+		{10004901-31CA-437E-BDB7-8C41EA82F756}.Release|anycpu.ActiveCfg = Release|anycpu
+		{10004901-31CA-437E-BDB7-8C41EA82F756}.Release|anycpu.Build.0 = Release|anycpu
 	EndGlobalSection
 EndGlobal
