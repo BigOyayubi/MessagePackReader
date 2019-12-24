@@ -1,6 +1,6 @@
 # MiniMessagePack
 
-simple and typeless MessagePack Reader for C#. 
+simple and nongeneric MessagePack Reader for C#. 
 
 # References
 
