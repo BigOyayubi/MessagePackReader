@@ -13,7 +13,6 @@ namespace MessagePackProfile
     {
         private byte[] ArrayModelSerialized;
         private string ArrayModelJsonString;
-        private byte[] MapModelSerialized;
 
         [GlobalSetup]
         public void Setup()
@@ -25,7 +24,7 @@ namespace MessagePackProfile
             var options = MessagePack.MessagePackSerializerOptions.Standard.WithResolver(resolver);
             MessagePack.MessagePackSerializer.DefaultOptions = options;
 
-            IList<Models.SampleModel1> arrayObjects = Enumerable.Range(0, 100).Select(_ => new Models.SampleModel1()).ToList();
+            IList<Models.SampleModel1> arrayObjects = Enumerable.Range(0, 1000).Select(_ => new Models.SampleModel1().Set(_)).ToList();
             this.ArrayModelSerialized = MessagePack.MessagePackSerializer.Serialize(arrayObjects);
             this.ArrayModelJsonString = MessagePack.MessagePackSerializer.SerializeToJson(arrayObjects);
         }
@@ -54,7 +53,15 @@ namespace MessagePackProfile
             {
                 var value = list[i] as Dictionary<object, object>;
                 var kv = value["Key"];
-                var iv = (byte)value["IntValue"];
+                var io = value["IntValue"];
+                if(io is byte)
+                {
+                    var iv = (byte)io;
+                }
+                else if(io is ushort)
+                {
+                    var iv = (ushort)io;
+                }
                 var fv = (float)value["FloatValue"];
             }
         }
@@ -103,13 +110,21 @@ namespace MessagePackProfile
         }
 
 
-        //[Benchmark]
-        public object DeserializeMapModelSerializedMessagePackCSharp() => MessagePack.MessagePackSerializer.Deserialize<dynamic>(this.MapModelSerialized);
-
         [Benchmark]
         public void ArrayModelMiniMessagePack()
         {
             var reader = Reader.Deserialize(this.ArrayModelSerialized);
+
+#if true
+            //faster than below
+            foreach(var tmp in reader)
+            {
+                var sv = tmp["Key"].GetString();
+                var iv = tmp["IntValue"].GetInt();
+                var fv = tmp["FloatValue"].GetFloat();
+            }
+
+#else
             var length = reader.ArrayLength;
             for(int i = 0; i < length; i++)
             {
@@ -119,6 +134,7 @@ namespace MessagePackProfile
                 tmp["IntValue"].GetInt();
                 tmp["FloatValue"].GetFloat();
             }
+#endif
         }
     }
 }

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace MiniMessagePack
 {
-    public partial struct Reader
+    public partial struct Reader : IEnumerable<Reader>
     {
         #region public
         /// <summary>
@@ -56,6 +56,20 @@ namespace MiniMessagePack
             }
         }
 
+        public Enumerator GetEnumerator()
+        {
+            return new Enumerator(ref this);
+        }
+        IEnumerator<Reader> IEnumerable<Reader>.GetEnumerator()
+        {
+            return new Enumerator(ref this);
+        }
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            throw new NotImplementedException();
+        }
+
+
         public byte GetByte() { return _reader.GetByte(); }
         public sbyte GetSByte() { return _reader.GetSByte(); }
         public short GetShort() { return _reader.GetShort(); }
@@ -97,6 +111,60 @@ namespace MiniMessagePack
         Reader(byte[] data, int position = 0)
         {
             _reader = new MsgpackReader(data, position);
+        }
+        Reader(ref Reader r)
+        {
+            _reader = new MsgpackReader(r._reader.Source, r._reader.Position);
+        }
+
+        public struct Enumerator : IEnumerator<Reader>
+        {
+            private SequencialReader _reader;
+            private Reader _current;
+            private readonly int _count;
+            private int _index;
+
+            internal Enumerator(ref Reader r)
+            {
+                _reader = new SequencialReader(r._reader.Source, r._reader.Position);
+                _current = new Reader();
+                _index = 0;
+                _count = _reader.ReadArrayElementCount();
+            }
+            public bool MoveNext()
+            {
+                if(_index < _count)
+                {
+                    _current = new Reader(_reader.Source, _reader.Position);
+                    _reader.SkipElement();
+                    _index++;
+                    return true;
+                }
+                _index = _count + 1;
+                return false;
+            }
+
+            public Reader Current { get { return _current; } }
+
+            public void Dispose() { }
+
+            object IEnumerator.Current
+            {
+                get
+                {
+                    if(_index == 0 || _index == _count + 1)
+                    {
+                        throw new MiniMessagePackException(string.Format("Invalid access to array. index={0}", _index));
+                    }
+                    return new Reader(ref _current);
+                }
+            }
+
+            void IEnumerator.Reset()
+            {
+                throw new MiniMessagePackException("can not reset MiniMessagePack.Reader.Enumerator");
+            }
+
         }
 
         struct MsgpackReader
@@ -473,6 +541,8 @@ namespace MiniMessagePack
                 _source = source;
                 _position = position;
             }
+
+            public byte[] Source { get { return _source; } }
 
             public int Position { get { return _position;  } }
 
