@@ -30,7 +30,7 @@ namespace MessagePackProfile
         }
 
         [Benchmark]
-        public void ArrayMessagePackCSharp()
+        public void Array_MessagePackCSharp()
         {
             var deserialize = MessagePack.MessagePackSerializer.Deserialize<IList<Models.SampleModel1>>(this.ArrayModelSerialized);
             var length = deserialize.Count;
@@ -44,7 +44,7 @@ namespace MessagePackProfile
         }
 
         [Benchmark]
-        public void ArrayMessagePackCSharpTypeless()
+        public void Array_MessagePackCSharpTypeless()
         {
             var deserialize = MessagePack.MessagePackSerializer.Deserialize<object>(this.ArrayModelSerialized);
             var list = deserialize as object[];
@@ -67,7 +67,7 @@ namespace MessagePackProfile
         }
 
         [Benchmark]
-        public void ArrayUtf8Json()
+        public void Array_Utf8Json()
         {
             var deserialize = Utf8Json.JsonSerializer.Deserialize<dynamic>(this.ArrayModelJsonString) as List<object>;
             var length = deserialize.Count;
@@ -81,7 +81,7 @@ namespace MessagePackProfile
         }
 
         [Benchmark]
-        public void ArrayMiniJSON()
+        public void Array_MiniJSON()
         {
             var deserialize = MiniJSON.Json.Deserialize(this.ArrayModelJsonString) as IList<object>;
             var length = deserialize.Count;
@@ -95,7 +95,7 @@ namespace MessagePackProfile
         }
 
         [Benchmark]
-        public void ArrayMsgPackCli()
+        public void Array_MsgPackCli()
         {
             var serializer = MsgPack.Serialization.MessagePackSerializer.Get<IList<Models.SampleModel1>>();
             var deserialize = serializer.UnpackSingleObject(this.ArrayModelSerialized);
@@ -109,24 +109,56 @@ namespace MessagePackProfile
             }
         }
 
+        [Benchmark]
+        public void Array_MiniMessagePackForeach1()
+        {
+            var reader = Reader.Create(this.ArrayModelSerialized);
+
+            //faster than below
+            foreach (var arrayValue in reader.AsArrayEnumerable())
+            {
+                arrayValue["Key"].GetString();
+                arrayValue["IntValue"].GetInt();
+                arrayValue["FloatValue"].GetFloat();
+            }
+        }
+
 
         [Benchmark]
-        public void ArrayModelMiniMessagePack()
+        public void Array_MiniMessagePackForeach2()
         {
-            var reader = Reader.Deserialize(this.ArrayModelSerialized);
+            var reader = Reader.Create(this.ArrayModelSerialized);
 
-#if true
             //faster than below
-            foreach(var tmp in reader)
+            foreach(var arrayValue in reader.AsArrayEnumerable())
             {
-                var sv = tmp["Key"].GetString();
-                var iv = tmp["IntValue"].GetInt();
-                var fv = tmp["FloatValue"].GetFloat();
+                foreach(var mapValue in arrayValue.AsMapEnumerable())
+                {
+                    switch(mapValue.Key)
+                    {
+                        case "Key":
+                            var sv = mapValue.Value.GetString();
+                            break;
+                        case "IntValue":
+                            var iv = mapValue.Value.GetInt();
+                            break;
+                        case "FloatValue":
+                            var fv = mapValue.Value.GetFloat();
+                            break;
+                        default:
+                            break;
+                    }
+                }
             }
+        }
 
-#else
+        [Benchmark]
+        public void Array_MiniMessagePackFor()
+        {
+            var reader = Reader.Create(this.ArrayModelSerialized);
+
             var length = reader.ArrayLength;
-            for(int i = 0; i < length; i++)
+            for (int i = 0; i < length; i++)
             {
                 var tmp = reader[i];
 
@@ -134,7 +166,23 @@ namespace MessagePackProfile
                 tmp["IntValue"].GetInt();
                 tmp["FloatValue"].GetFloat();
             }
-#endif
+        }
+
+        [Benchmark]
+        public void Array_MiniMessagePackBytesKey()
+        {
+            var reader = Reader.Create(this.ArrayModelSerialized);
+
+            var KeyBytes = Reader.ToBytes("Key");
+            var IntValueBytes = Reader.ToBytes("IntValue");
+            var FloatValueBytes = Reader.ToBytes("FloatValue");
+
+            foreach (var arrayValue in reader.AsArrayEnumerable())
+            {
+                arrayValue[KeyBytes].GetString();
+                arrayValue[IntValueBytes].GetInt();
+                arrayValue[FloatValueBytes].GetFloat();
+            }
         }
     }
 }

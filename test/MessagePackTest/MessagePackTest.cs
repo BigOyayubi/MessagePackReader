@@ -214,7 +214,7 @@ namespace MessagePackTest
             var baseString = "あいうえお";
             byte[] array = System.Text.Encoding.UTF8.GetBytes(baseString);
             var bin = Serialize(array);
-            var reader = MiniMessagePack.Reader.Deserialize(bin);
+            var reader = MiniMessagePack.Reader.Create(bin);
             var unpacked = reader.GetBinary();
             Assert.AreEqual(array.SequenceEqual(unpacked), true);
             var s = System.Text.Encoding.UTF8.GetString(unpacked);
@@ -226,7 +226,7 @@ namespace MessagePackTest
         {
             object[] array = { byte.MinValue, int.MinValue, "あいうえお" };
             var bin = Serialize(array);
-            var reader = MiniMessagePack.Reader.Deserialize(bin);
+            var reader = MiniMessagePack.Reader.Create(bin);
             Assert.AreEqual(reader[0].GetByte(), array[0]);
             Assert.AreEqual(reader[1].GetInt(), array[1]);
             Assert.AreEqual(reader[2].GetString(), array[2]);
@@ -243,7 +243,7 @@ namespace MessagePackTest
             };
 
             var bin = Serialize(map);
-            var reader = MiniMessagePack.Reader.Deserialize(bin);
+            var reader = MiniMessagePack.Reader.Create(bin);
             Assert.AreEqual(reader["byte"].GetByte(), map["byte"] );
             Assert.AreEqual(reader["int"].GetInt(), map["int"]);
             Assert.AreEqual(reader["string"].GetString(), map["string"]);
@@ -260,7 +260,7 @@ namespace MessagePackTest
                 { "array", new object[]{ byte.MinValue, int.MinValue, float.MinValue, "あいうえお" } },
             };
             var bin = Serialize(map);
-            var reader = MiniMessagePack.Reader.Deserialize(bin);
+            var reader = MiniMessagePack.Reader.Create(bin);
             Assert.AreEqual(reader["byte"].GetByte(), map["byte"]);
             Assert.AreEqual(reader["int"].GetInt(), map["int"]);
             Assert.AreEqual(reader["array"][0].GetByte(),  ((object[])map["array"])[0]);
@@ -277,7 +277,7 @@ namespace MessagePackTest
                 Console.WriteLine("test " + i);
                 var bin = Serialize(i);
 
-                var reader = MiniMessagePack.Reader.Deserialize(bin);
+                var reader = MiniMessagePack.Reader.Create(bin);
                 Assert.AreEqual( travarse.Invoke(ref reader), i);
             }
         }
