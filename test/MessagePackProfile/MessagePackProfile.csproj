@@ -31,6 +31,7 @@
   </PropertyGroup>
   <ItemGroup>
     <None Include="app.config" />
+    <None Include="fbs\SampleModel1.fbs" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
@@ -200,8 +201,20 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="fbs\SampleModel1Array.cs" />
+    <Compile Include="fbs\SampleModel1Element.cs" />
+    <Compile Include="FlatBuffers\ByteBuffer.cs" />
+    <Compile Include="FlatBuffers\ByteBufferUtil.cs" />
+    <Compile Include="FlatBuffers\FlatBufferBuilder.cs" />
+    <Compile Include="FlatBuffers\FlatBufferConstants.cs" />
+    <Compile Include="FlatBuffers\IFlatbufferObject.cs" />
+    <Compile Include="FlatBuffers\Offset.cs" />
+    <Compile Include="FlatBuffers\Properties\AssemblyInfo.cs" />
+    <Compile Include="FlatBuffers\Struct.cs" />
+    <Compile Include="FlatBuffers\Table.cs" />
     <Compile Include="MiniJSON.cs" />
     <Compile Include="Models\SampleModel1.cs" />
+    <Compile Include="Models\SampleModel2.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="SerializerBenchmark.cs" />
     <Compile Include="BenchmarkConfig.cs" />
@@ -215,6 +228,10 @@
       <Project>{201004c2-d7aa-4ef0-b30c-280a28390613}</Project>
       <Name>MiniMessagePack</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="FlatBuffers\FlatBuffers.Core.csproj" />
+    <Content Include="FlatBuffers\FlatBuffers.csproj" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

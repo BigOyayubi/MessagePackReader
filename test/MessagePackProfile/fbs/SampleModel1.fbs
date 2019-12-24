@@ -1,0 +1,15 @@
+﻿
+namespace MessagePackProfile.flatbuffers;
+
+table SampleModel1Array
+{
+    elements:[SampleModel1Element];
+}
+table SampleModel1Element {
+    Key:string;
+	IntValue:int;
+	FloatValue:float;
+	DoubleValue:double;
+}
+
+root_type SampleModel1Array;
