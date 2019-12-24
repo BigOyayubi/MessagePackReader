@@ -36,6 +36,11 @@ namespace MiniMessagePack
             return new MessagePackReader(data);
         }
 
+        /// <summary>
+        /// Mapであればkeyに該当するValueを指すMsgPackを取得
+        /// get value by utf8 byte[] it peek map
+        /// <see cref="KeyToBytes(string)"/>
+        /// </summary>
         public MessagePackReader this[byte[] key]
         {
             get
@@ -45,6 +50,9 @@ namespace MiniMessagePack
             }
         }
 
+        /// <summary>
+        /// string to utf8 byte[]
+        /// </summary>
         public static byte[] KeyToBytes(string key)
         {
             return System.Text.Encoding.UTF8.GetBytes(key);
@@ -63,22 +71,24 @@ namespace MiniMessagePack
             }
         }
 
+        /// <summary>
+        /// MapであればKey/Valueペアのforeachで巡回できる
+        /// enable to foreach if map
+        /// </summary>
         public MapEnumerable AsMapEnumerable()
         {
             return new MapEnumerable(ref this);
         }
 
-        public int ArrayLength
-        {
-            get
-            {
-                return _reader.GetArrayLength();
-            }
-        }
+        /// <summary>
+        /// Arrayであれば要素数を取得
+        /// </summary>
+        public int ArrayLength { get { return _reader.GetArrayLength(); } }
 
         /// <summary>
         /// Arrayであればindexに該当するValueを指すMsgPackを取得
         /// Get MsgPack which peek value of index.
+        /// warning! foreach is faster than for.
         /// </summary>
         public MessagePackReader this[int index]
         {
@@ -89,6 +99,10 @@ namespace MiniMessagePack
             }
         }
 
+        /// <summary>
+        /// Arrayであればforeach巡回が可能
+        /// enable to foreach if array
+        /// </summary>
         public ArrayEnumerable AsArrayEnumerable()
         {
             return new ArrayEnumerable(ref this);
@@ -108,7 +122,7 @@ namespace MiniMessagePack
         public string GetString() { return _reader.GetString(); }
         public byte[] GetBinary() { return _reader.GetBinary(); }
         public DateTime GetTimestamp() { return _reader.GetTimestamp(); }
-        public Extension GetExtension() { return _reader.GetExtension(); }
+        public MessagePackExtension GetExtension() { return _reader.GetExtension(); }
         public byte GetFormatCode() { return _reader.Source[_reader.Position]; }
         public string GetFormatName() { return Spec.GetFormatName(GetFormatCode()); }
         #endregion //public
@@ -123,7 +137,7 @@ namespace MiniMessagePack
     /// <summary>
     /// messagePackPack Extension data
     /// </summary>
-    public struct Extension
+    public struct MessagePackExtension
     {
         public sbyte TypeCode;
         public byte[] Data;
@@ -132,6 +146,8 @@ namespace MiniMessagePack
     public partial struct MessagePackReader
     {
         readonly MessagePackProcessor _reader;
+
+        #region constructor
         MessagePackReader(byte[] data, int position = 0)
         {
             _reader = new MessagePackProcessor(data, position);
@@ -140,7 +156,11 @@ namespace MiniMessagePack
         {
             _reader = new MessagePackProcessor(r._reader.Source, r._reader.Position);
         }
+        #endregion //constructor
 
+        /// <summary>
+        /// enable map enumerable.
+        /// </summary>
         public sealed class MapEnumerable : IEnumerable<KeyValuePair<string, MessagePackReader>>
         {
             private MessagePackReader _reader;
@@ -212,7 +232,7 @@ namespace MiniMessagePack
         }
 
         /// <summary>
-        /// avairable array foreach
+        /// enable array foreach
         /// </summary>
         public sealed class ArrayEnumerable : IEnumerable<MessagePackReader>
         {
@@ -282,16 +302,12 @@ namespace MiniMessagePack
             }
         }
 
-
-        struct MessagePackProcessor
+        /// <summary>
+        /// implementation of parsing MessagePack
+        /// </summary>
+        internal struct MessagePackProcessor
         {
             public MessagePackProcessor(byte[] data, int position = 0)
-            {
-                _source = data;
-                _position = position;
-            }
-
-            public void Reset(byte[] data, int position)
             {
                 _source = data;
                 _position = position;
@@ -304,7 +320,6 @@ namespace MiniMessagePack
             /// <summary>
             /// Seek位置がArrayであれば、Element数を返す
             /// </summary>
-            /// <returns></returns>
             public int GetArrayLength()
             {
                 var reader = new SequencialReader(_source, _position);
@@ -314,8 +329,6 @@ namespace MiniMessagePack
             /// <summary>
             /// Seek位置がArrayであれば、該当indexのElement位置を返す
             /// </summary>
-            /// <param name="index"></param>
-            /// <returns></returns>
             public int GetArrayElementPosition(int index)
             {
                 var reader = new SequencialReader(_source, _position);
@@ -338,27 +351,6 @@ namespace MiniMessagePack
             /// <summary>
             /// Seek位置がMapであれば、該当KeyのValue位置を返す
             /// </summary>
-            public int GetMapValuePosition(string key)
-            {
-                var reader = new SequencialReader(_source, _position);
-
-                int mapElementCount = reader.ReadMapElementCount();
-
-                for(int i = 0; i < mapElementCount; i++)
-                {
-                    //get key
-                    string mapkey = reader.ReadString();
-                    if(mapkey == key)
-                    {
-                        return reader.Position;
-                    }
-                    //skip value
-                    reader.SkipElement();
-                }
-
-                // not found key
-                throw new MiniMessagePackException(string.Format("not found key {0}", key));
-            }
             public int GetMapValuePosition(byte[] key)
             {
                 var reader = new SequencialReader(_source, _position);
@@ -635,18 +627,21 @@ namespace MiniMessagePack
                 return reader.ReadTimestamp(header);
             }
 
-            public Extension GetExtension()
+            public MessagePackExtension GetExtension()
             {
                 var reader = new SequencialReader(_source, _position);
                 var header = reader.ReadExtHeader();
                 var data = reader.ReadExtensionData(header);
-                return new Extension() { TypeCode = header.TypeCode, Data = data };
+                return new MessagePackExtension() { TypeCode = header.TypeCode, Data = data };
             }
 
             byte[] _source;
             int _position;
         }
 
+        /// <summary>
+        /// implementation of parsing byte[]
+        /// </summary>
         struct SequencialReader
         {
             readonly byte[] _source;
@@ -662,30 +657,24 @@ namespace MiniMessagePack
 
             public int Position { get { return _position;  } }
 
-            public byte PeekToken
-            {
-                get
-                {
-                    return _source[_position];
-                }
-            }
+            /// <summary>
+            /// Seek位置のデータを取得
+            /// </summary>
+            public byte PeekToken { get { return _source[_position]; } }
 
-            public byte PeekSourceType
-            {
-                get
-                {
-                    return Spec.GetSourceType(PeekToken);
-                }
-            }
+            /// <summary>
+            /// Seek位置のMessagePack SourceTypeを取得
+            /// </summary>
+            public byte PeekSourceType { get { return Spec.GetSourceType(PeekToken); } }
 
-            public string PeekFormatName
-            {
-                get
-                {
-                    return Spec.GetFormatName(PeekToken);
-                }
-            }
+            /// <summary>
+            /// Seek位置のMessagePack Format名を取得
+            /// </summary>
+            public string PeekFormatName { get { return Spec.GetFormatName(PeekToken); } }
 
+            /// <summary>
+            /// Seek位置のMapElementを読み飛ばし次のElementを指す
+            /// </summary>
             public void SkipElement()
             {
                 var token = PeekToken;
@@ -789,6 +778,9 @@ namespace MiniMessagePack
                 }
             }
 
+            /// <summary>
+            /// Nilを読み出しSeek位置を進める
+            /// </summary>
             public Nil ReadNil()
             {
                 byte code;
@@ -800,6 +792,9 @@ namespace MiniMessagePack
                 return Nil.Default;
             }
 
+            /// <summary>
+            /// Array要素数を読み出しSeek位置を進める
+            /// </summary>
             public int ReadArrayElementCount()
             {
                 int v;
@@ -807,6 +802,9 @@ namespace MiniMessagePack
                 return v;
             }
 
+            /// <summary>
+            /// Array要素数読み出しに成功したらtrueを返しSeek位置も進める
+            /// </summary>
             public bool TryReadArrayElementCount(out int count)
             {
                 byte token;
@@ -848,6 +846,9 @@ namespace MiniMessagePack
                 return false;
             }
 
+            /// <summary>
+            /// Map要素数を読み出しSeek位置を進める
+            /// </summary>
             public int ReadMapElementCount()
             {
                 int v;
@@ -855,6 +856,9 @@ namespace MiniMessagePack
                 return v;
             }
 
+            /// <summary>
+            /// Map要素数読み出しに成功したらtrueを返しSeek位置も進める
+            /// </summary>
             public bool TryReadMapElementCount(out int count)
             {
                 count = 0;
@@ -894,6 +898,9 @@ namespace MiniMessagePack
                 return true;
             }
 
+            /// <summary>
+            /// Timestamp情報を読み出しSeek位置を進める
+            /// </summary>
             public DateTime ReadTimestamp(ExtensionHeader header)
             {
                 if(header.TypeCode != Spec.ExtTypeCode_Timestamp)
@@ -929,6 +936,10 @@ namespace MiniMessagePack
                         throw new MiniMessagePackException(string.Format("Invalid Ext Timestamp length {0}", header.Length));
                 }
             }
+
+            /// <summary>
+            /// 拡張情報を読み出しSeek位置を進める
+            /// </summary>
             public byte[] ReadExtensionData(ExtensionHeader header)
             {
                 byte[] data = new byte[header.Length];
@@ -936,6 +947,9 @@ namespace MiniMessagePack
                 return data;
             }
 
+            /// <summary>
+            /// 拡張情報ヘッダを読み出しSeek位置を進める
+            /// </summary>
             public ExtensionHeader ReadExtHeader()
             {
                 var token = ReadToken();
@@ -983,6 +997,9 @@ namespace MiniMessagePack
                 return new ExtensionHeader(typeCode, length);
             }
 
+            /// <summary>
+            /// Binary情報を読み出しSeek位置を進める
+            /// </summary>
             public byte[] ReadBinary()
             {
                 var byteLength = ReadBinaryByteLength();
@@ -993,6 +1010,9 @@ namespace MiniMessagePack
                 return bytesResult;
             }
 
+            /// <summary>
+            /// Binaryサイズを読み出しSeek位置を進める
+            /// </summary>
             int ReadBinaryByteLength()
             {
                 var token = ReadToken();
@@ -1018,6 +1038,9 @@ namespace MiniMessagePack
                 return default(int);
             }
 
+            /// <summary>
+            /// 文字列との比較結果を返しSeek位置を進める
+            /// </summary>
             public bool CompareAndReadString(byte[] key)
             {
                 var token = PeekToken;
@@ -1045,6 +1068,9 @@ namespace MiniMessagePack
                 return true;
             }
 
+            /// <summary>
+            /// 文字列を読み出しSeek位置を進める
+            /// </summary>
             public string ReadString()
             {
                 var token = PeekToken;
@@ -1060,6 +1086,9 @@ namespace MiniMessagePack
                 return value;
             }
 
+            /// <summary>
+            /// 文字列サイズを読み出しSeek位置を進める
+            /// </summary>
             int ReadStringByteLength()
             {
                 var token = ReadToken();
@@ -1110,6 +1139,7 @@ namespace MiniMessagePack
                 ThrowEndOfStreamExceptionUnless(TryRead(out value));
                 return value;
             }
+
             public sbyte ReadSByte()
             {
                 sbyte value;
@@ -1186,7 +1216,7 @@ namespace MiniMessagePack
                 return true;
             }
 
-            public bool TryReadBigEndian(out float value)
+            bool TryReadBigEndian(out float value)
             {
                 if(!BitConverter.IsLittleEndian)
                 {
@@ -1196,7 +1226,7 @@ namespace MiniMessagePack
                 return TryReadReverseBit(out value);
             }
 
-            public bool TryReadBigEndian(out double value)
+            bool TryReadBigEndian(out double value)
             {
                 if(!BitConverter.IsLittleEndian)
                 {
@@ -1206,7 +1236,7 @@ namespace MiniMessagePack
                 return TryReadReverseBit(out value);
             }
 
-            public bool TryReadBigEndian(out short value)
+            bool TryReadBigEndian(out short value)
             {
                 if(!BitConverter.IsLittleEndian)
                 {
@@ -1216,7 +1246,7 @@ namespace MiniMessagePack
                 return TryReadReverseBit(out value);
             }
 
-            public bool TryReadBigEndian(out ushort value)
+            bool TryReadBigEndian(out ushort value)
             {
                 short tmp;
                 if(!TryReadBigEndian(out tmp))
@@ -1228,7 +1258,7 @@ namespace MiniMessagePack
                 return true;
             }
 
-            public bool TryReadBigEndian(out int value)
+            bool TryReadBigEndian(out int value)
             {
                 if(!BitConverter.IsLittleEndian)
                 {
@@ -1238,7 +1268,7 @@ namespace MiniMessagePack
                 return TryReadReverseBit(out value);
             }
 
-            public bool TryReadBigEndian(out uint value)
+            bool TryReadBigEndian(out uint value)
             {
                 int tmp;
                 if(!TryReadBigEndian(out tmp))
@@ -1251,7 +1281,7 @@ namespace MiniMessagePack
                 return true;
             }
 
-            public bool TryReadBigEndian(out long value)
+            bool TryReadBigEndian(out long value)
             {
                 if(!BitConverter.IsLittleEndian)
                 {
@@ -1261,7 +1291,7 @@ namespace MiniMessagePack
                 return TryReadReverseBit(out value);
             }
 
-            public bool TryReadBigEndian(out ulong value)
+             bool TryReadBigEndian(out ulong value)
             {
                 long tmp;
                 if(!TryReadBigEndian(out tmp))
@@ -1274,7 +1304,9 @@ namespace MiniMessagePack
                 return true;
             }
 
-
+            /// <summary>
+            /// Seek位置からデータを読み出しSeek位置を進める
+            /// </summary>
             public byte ReadToken()
             {
                 byte r;
@@ -1283,6 +1315,9 @@ namespace MiniMessagePack
                 return r;
             }
 
+            /// <summary>
+            /// データ読み出しに成功したらtrueを返しSeek位置を進める
+            /// </summary>
             public bool TryReadToken(out byte token)
             {
                 if (_position == _source.Length)
@@ -1495,6 +1530,10 @@ namespace MiniMessagePack
 #endregion //private
         }
 
+        /// <summary>
+        /// 拡張情報ヘッダ
+        /// </summary>
+
         struct ExtensionHeader
         {
             public sbyte TypeCode { get; private set; }
@@ -1513,6 +1552,9 @@ namespace MiniMessagePack
             }
         }
 
+        /// <summary>
+        /// 拡張情報Timestamp変換
+        /// </summary>
         static class DateTimeConverter
         {
             static readonly DateTime _baseTime = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
@@ -1635,8 +1677,10 @@ namespace MiniMessagePack
         }
 
 
-
-        struct Nil : IEquatable<Nil>
+        /// <summary>
+        /// Nilを示す
+        /// </summary>
+        internal struct Nil : IEquatable<Nil>
         {
             public static readonly Nil Default = default(Nil);
 
@@ -1661,6 +1705,10 @@ namespace MiniMessagePack
             }
         }
 
+        /// <summary>
+        /// MessagePack仕様
+        /// <seealso cref="https://github.com/msgpack/msgpack/blob/master/spec.md"/>
+        /// </summary>
         static class Spec
         {
 #region Output formats
