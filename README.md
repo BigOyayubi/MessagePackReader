@@ -44,11 +44,34 @@ If you want to do it, I recommend to use other libraries, like MsgPackCli, Messa
 
 * Copy src/MiniMessagePack/MessagePack/MiniMessagePack.cs to your project
 
-```
+```csharp
   byte[] msgpack;
-  var reader = MiniMessagePack.MsgPack.Deserialize(msgpack);
-  byte b = reader["a"][0].GetByte();
-  string s = reader["b"].GetString();
+  var reader = MiniMessagePack.MessagePackReader.Create(msgpack);
+  
+  //simple pattern. easy to use but slow.
+  {
+    var length = reader.ArrayLength;
+    for(int i = 0; i < length; i++){
+      byte   b = reader[i]["ByteValue"].GetByte();
+      string s = reader[i]["StringValue"].GetString();
+    }
+  }
+
+  //foreach pattern. faster than for
+  foreach(var arrayValue in reader.AsArrayEnumerable()){
+    byte   b = arrayValue["ByteValue"].GetByte();
+    string s = arrayValue["StringValue"].GetString();
+  }
+
+  //fastest pattern. reuse string key as utf8 byte[].
+  {
+    var byteKey = MiniMessagePack.MessagePackReader.KeyToBytes("ByteValue");
+    var strKey  = MiniMessagePack.MessagePackReader.KeyToBytes("StringValue");
+    foreach(var arrayValue in reader.AsArrayEnumerable()){
+      byte   b = arrayValue[byteKey].GetByte();
+      string s = arrayValue[strKey ].GetString();
+    }
+  }
 ```
 
 # Profile
