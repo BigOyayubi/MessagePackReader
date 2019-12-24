@@ -25,14 +25,20 @@ MiniMessagePack is inspired by MiniJSON[1] and MessagePack-CSharp[2].
         * Easy to install
     * Does not need types to deserialize
     	* Declare a lot of classes to deserialize, IL2CPP will generate huge C++ files(e.g. xGB) then will cause build error.
-* Read Only
+* Struct Base
+    * なるべくヒープを経由しないようにします
+    * avoid to use heap.
+* byte[] to primitive.
     * ボクシング回避
         * 値型をobject型で読み取るとボクシングが発生するため
-    * データをシリアライズしたい場合、他のMessagePackライブラリを使うことをおすすめします。
     * avoid boxing
     	* because deserialize from primitive to object, it will cause boxing.
-    * if you want to serialize some data to messagepack,<br>
-      I recommend to use other MessagePack libs. like MesaagePack-Cli, MessagePack-CSharp
+
+# Warning
+
+MiniMessagePack can "not" serialize data.
+
+If you want to do it, I recommend to use other libraries, like MsgPackCli, MessagePack-CSharp...
 
 # QuickStart
 
