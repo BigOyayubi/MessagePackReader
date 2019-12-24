@@ -45,8 +45,9 @@ MiniMessagePack is inspired by MiniJSON[1] and MessagePack-CSharp[2].
   string s = reader["b"].GetString();
 ```
 
-# TODO
+# Profile
 
-* Profile
-    * 全てstructで処理しているのは妥当？
-    * is it right? : MiniMessagePack.MsgPack is "struct"
+1000要素配列を走査しプロパティを参照。負荷が低すぎるような・・・
+read array of 1000 instances and get properties. is it true...?
+
+![profile](https://github.com/BigOyayubi/MiniMessagePack/doc/profile.jpg)
