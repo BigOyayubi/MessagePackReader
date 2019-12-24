@@ -22,7 +22,7 @@ namespace MessagePackTest
                 byte.MaxValue/2,
                 byte.MaxValue,
             };
-            TestArray(array, (ref MiniMessagePack.Reader reader) => reader.GetByte());
+            TestArray(array, (ref MiniMessagePack.MessagePackReader reader) => reader.GetByte());
         }
 
         [Test]
@@ -37,7 +37,7 @@ namespace MessagePackTest
                 sbyte.MaxValue,
             };
 
-            TestArray(array, (ref MiniMessagePack.Reader reader) => reader.GetSByte());
+            TestArray(array, (ref MiniMessagePack.MessagePackReader reader) => reader.GetSByte());
         }
 
         [Test]
@@ -54,7 +54,7 @@ namespace MessagePackTest
                 byte.MaxValue,
                 short.MaxValue
             };
-            TestArray(array, (ref MiniMessagePack.Reader reader) => reader.GetShort());
+            TestArray(array, (ref MiniMessagePack.MessagePackReader reader) => reader.GetShort());
         }
 
         [Test]
@@ -68,7 +68,7 @@ namespace MessagePackTest
                 (ushort)short.MaxValue,
                 ushort.MaxValue
             };
-            TestArray(array, (ref MiniMessagePack.Reader reader) => reader.GetUShort() );
+            TestArray(array, (ref MiniMessagePack.MessagePackReader reader) => reader.GetUShort() );
         }
 
         [Test]
@@ -89,7 +89,7 @@ namespace MessagePackTest
                 int.MaxValue,
             };
 
-            TestArray(array, (ref MiniMessagePack.Reader reader) => reader.GetInt());
+            TestArray(array, (ref MiniMessagePack.MessagePackReader reader) => reader.GetInt());
         }
 
         [Test]
@@ -106,7 +106,7 @@ namespace MessagePackTest
                 (uint)int.MaxValue,
                 uint.MaxValue
             };
-            TestArray(array, (ref MiniMessagePack.Reader reader) => reader.GetUInt());
+            TestArray(array, (ref MiniMessagePack.MessagePackReader reader) => reader.GetUInt());
         }
 
         [Test]
@@ -128,7 +128,7 @@ namespace MessagePackTest
                 int.MaxValue,
                 long.MaxValue,
             };
-            TestArray(array, (ref MiniMessagePack.Reader reader) => reader.GetLong());
+            TestArray(array, (ref MiniMessagePack.MessagePackReader reader) => reader.GetLong());
         }
 
         [Test]
@@ -146,7 +146,7 @@ namespace MessagePackTest
                 uint.MaxValue,
                 ulong.MaxValue,
             };
-            TestArray(array, (ref MiniMessagePack.Reader reader) => reader.GetULong());
+            TestArray(array, (ref MiniMessagePack.MessagePackReader reader) => reader.GetULong());
         }
 
         [Test]
@@ -162,7 +162,7 @@ namespace MessagePackTest
                 float.MaxValue/2f,
                 float.MaxValue
             };
-            TestArray(array, (ref MiniMessagePack.Reader reader) => reader.GetFloat());
+            TestArray(array, (ref MiniMessagePack.MessagePackReader reader) => reader.GetFloat());
         }
 
         [Test]
@@ -182,7 +182,7 @@ namespace MessagePackTest
                 double.MaxValue/2f,
                 double.MaxValue
             };
-            TestArray(array, (ref MiniMessagePack.Reader reader) => reader.GetDouble());
+            TestArray(array, (ref MiniMessagePack.MessagePackReader reader) => reader.GetDouble());
         }
 
         [Test]
@@ -193,7 +193,7 @@ namespace MessagePackTest
                 false,
                 true
             };
-            TestArray(array, (ref MiniMessagePack.Reader reader) => reader.GetBool());
+            TestArray(array, (ref MiniMessagePack.MessagePackReader reader) => reader.GetBool());
         }
 
         [Test]
@@ -205,7 +205,7 @@ namespace MessagePackTest
                 "aaaa",
                 "ああああ",
             };
-            TestArray(array, (ref MiniMessagePack.Reader reader) => reader.GetString());
+            TestArray(array, (ref MiniMessagePack.MessagePackReader reader) => reader.GetString());
         }
 
         [Test]
@@ -214,7 +214,7 @@ namespace MessagePackTest
             var baseString = "あいうえお";
             byte[] array = System.Text.Encoding.UTF8.GetBytes(baseString);
             var bin = Serialize(array);
-            var reader = MiniMessagePack.Reader.Create(bin);
+            var reader = MiniMessagePack.MessagePackReader.Create(bin);
             var unpacked = reader.GetBinary();
             Assert.AreEqual(array.SequenceEqual(unpacked), true);
             var s = System.Text.Encoding.UTF8.GetString(unpacked);
@@ -226,7 +226,7 @@ namespace MessagePackTest
         {
             object[] array = { byte.MinValue, int.MinValue, "あいうえお" };
             var bin = Serialize(array);
-            var reader = MiniMessagePack.Reader.Create(bin);
+            var reader = MiniMessagePack.MessagePackReader.Create(bin);
             Assert.AreEqual(reader[0].GetByte(), array[0]);
             Assert.AreEqual(reader[1].GetInt(), array[1]);
             Assert.AreEqual(reader[2].GetString(), array[2]);
@@ -243,7 +243,7 @@ namespace MessagePackTest
             };
 
             var bin = Serialize(map);
-            var reader = MiniMessagePack.Reader.Create(bin);
+            var reader = MiniMessagePack.MessagePackReader.Create(bin);
             Assert.AreEqual(reader["byte"].GetByte(), map["byte"] );
             Assert.AreEqual(reader["int"].GetInt(), map["int"]);
             Assert.AreEqual(reader["string"].GetString(), map["string"]);
@@ -260,7 +260,7 @@ namespace MessagePackTest
                 { "array", new object[]{ byte.MinValue, int.MinValue, float.MinValue, "あいうえお" } },
             };
             var bin = Serialize(map);
-            var reader = MiniMessagePack.Reader.Create(bin);
+            var reader = MiniMessagePack.MessagePackReader.Create(bin);
             Assert.AreEqual(reader["byte"].GetByte(), map["byte"]);
             Assert.AreEqual(reader["int"].GetInt(), map["int"]);
             Assert.AreEqual(reader["array"][0].GetByte(),  ((object[])map["array"])[0]);
@@ -269,7 +269,7 @@ namespace MessagePackTest
             Assert.AreEqual(reader["array"][3].GetString(), ((object[])map["array"])[3]);
         }
 
-        delegate T ArrayTravarse<T>(ref MiniMessagePack.Reader reader);
+        delegate T ArrayTravarse<T>(ref MiniMessagePack.MessagePackReader reader);
         void TestArray<T>(T[] array, ArrayTravarse<T> travarse)
         {
             foreach (var i in array)
@@ -277,7 +277,7 @@ namespace MessagePackTest
                 Console.WriteLine("test " + i);
                 var bin = Serialize(i);
 
-                var reader = MiniMessagePack.Reader.Create(bin);
+                var reader = MiniMessagePack.MessagePackReader.Create(bin);
                 Assert.AreEqual( travarse.Invoke(ref reader), i);
             }
         }

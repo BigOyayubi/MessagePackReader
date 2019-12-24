@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace MiniMessagePack
 {
-    public partial struct Reader
+    public partial struct MessagePackReader
     {
         #region public
         /// <summary>
@@ -26,25 +26,26 @@ namespace MiniMessagePack
         ///     int    i = value["Int"].GetInt();
         /// }
         /// </example>
-        public static Reader Create(byte[] data)
+        public static MessagePackReader Create(byte[] data)
         {
             if (data == null || data.Length <= 0)
             {
                 throw new System.NullReferenceException();
             }
 
-            return new Reader(data);
+            return new MessagePackReader(data);
         }
 
-        public Reader this[byte[] key]
+        public MessagePackReader this[byte[] key]
         {
             get
             {
                 int mapValuePosition = _reader.GetMapValuePosition(key);
-                return new Reader(_reader.Source, mapValuePosition);
+                return new MessagePackReader(_reader.Source, mapValuePosition);
             }
         }
-        public static byte[] ToBytes(string key)
+
+        public static byte[] KeyToBytes(string key)
         {
             return System.Text.Encoding.UTF8.GetBytes(key);
         }
@@ -53,7 +54,7 @@ namespace MiniMessagePack
         /// Mapであればkeyに該当するValueを指すMsgPackを取得
         /// Get MsgPack which peek value of key.
         /// </summary>
-        public Reader this[string key]
+        public MessagePackReader this[string key]
         {
             get
             {
@@ -79,12 +80,12 @@ namespace MiniMessagePack
         /// Arrayであればindexに該当するValueを指すMsgPackを取得
         /// Get MsgPack which peek value of index.
         /// </summary>
-        public Reader this[int index]
+        public MessagePackReader this[int index]
         {
             get
             {
                 int arrayElementPosition = _reader.GetArrayElementPosition(index);
-                return new Reader(_reader.Source, arrayElementPosition);
+                return new MessagePackReader(_reader.Source, arrayElementPosition);
             }
         }
 
@@ -128,27 +129,27 @@ namespace MiniMessagePack
         public byte[] Data;
     }
 
-    public partial struct Reader
+    public partial struct MessagePackReader
     {
-        readonly MsgpackReader _reader;
-        Reader(byte[] data, int position = 0)
+        readonly MessagePackProcessor _reader;
+        MessagePackReader(byte[] data, int position = 0)
         {
-            _reader = new MsgpackReader(data, position);
+            _reader = new MessagePackProcessor(data, position);
         }
-        Reader(ref Reader r)
+        MessagePackReader(ref MessagePackReader r)
         {
-            _reader = new MsgpackReader(r._reader.Source, r._reader.Position);
+            _reader = new MessagePackProcessor(r._reader.Source, r._reader.Position);
         }
 
-        public sealed class MapEnumerable : IEnumerable<KeyValuePair<string, Reader>>
+        public sealed class MapEnumerable : IEnumerable<KeyValuePair<string, MessagePackReader>>
         {
-            private Reader _reader;
-            public MapEnumerable(ref Reader r)
+            private MessagePackReader _reader;
+            public MapEnumerable(ref MessagePackReader r)
             {
                 _reader = r;
             }
 
-            public IEnumerator<KeyValuePair<string, Reader>> GetEnumerator()
+            public IEnumerator<KeyValuePair<string, MessagePackReader>> GetEnumerator()
             {
                 return new Enumerator(ref _reader );
             }
@@ -158,17 +159,17 @@ namespace MiniMessagePack
                 return new Enumerator(ref _reader);
             }
 
-            public struct Enumerator : IEnumerator<KeyValuePair<string,Reader>>
+            public struct Enumerator : IEnumerator<KeyValuePair<string,MessagePackReader>>
             {
                 private SequencialReader _reader;
-                private KeyValuePair<string, Reader> _current;
+                private KeyValuePair<string, MessagePackReader> _current;
                 private readonly int _count;
                 private int _index;
 
-                internal Enumerator(ref Reader r)
+                internal Enumerator(ref MessagePackReader r)
                 {
                     _reader = new SequencialReader(r._reader.Source, r._reader.Position);
-                    _current = new KeyValuePair<string, Reader>("", new Reader());
+                    _current = new KeyValuePair<string, MessagePackReader>("", new MessagePackReader());
                     _index = 0;
                     _count = _reader.ReadMapElementCount();
                 }
@@ -177,7 +178,7 @@ namespace MiniMessagePack
                     if (_index < _count)
                     {
                         var key = _reader.ReadString();
-                        _current = new KeyValuePair<string, Reader>(key, new Reader(_reader.Source, _reader.Position));
+                        _current = new KeyValuePair<string, MessagePackReader>(key, new MessagePackReader(_reader.Source, _reader.Position));
                         _reader.SkipElement();
                         _index++;
                         return true;
@@ -186,7 +187,7 @@ namespace MiniMessagePack
                     return false;
                 }
 
-                public KeyValuePair<string, Reader>  Current { get { return _current; } }
+                public KeyValuePair<string, MessagePackReader>  Current { get { return _current; } }
 
                 public void Dispose() { }
 
@@ -198,7 +199,7 @@ namespace MiniMessagePack
                         {
                             throw new MiniMessagePackException(string.Format("Invalid access to array. index={0}", _index));
                         }
-                        return new KeyValuePair<string, Reader>(_current.Key, _current.Value);
+                        return new KeyValuePair<string, MessagePackReader>(_current.Key, _current.Value);
                     }
                 }
 
@@ -213,15 +214,15 @@ namespace MiniMessagePack
         /// <summary>
         /// avairable array foreach
         /// </summary>
-        public sealed class ArrayEnumerable : IEnumerable<Reader>
+        public sealed class ArrayEnumerable : IEnumerable<MessagePackReader>
         {
-            private Reader _reader;
-            public ArrayEnumerable(ref Reader r)
+            private MessagePackReader _reader;
+            public ArrayEnumerable(ref MessagePackReader r)
             {
                 _reader = r;
             }
 
-            public IEnumerator<Reader> GetEnumerator()
+            public IEnumerator<MessagePackReader> GetEnumerator()
             {
                 return new Enumerator(ref _reader);
             }
@@ -231,17 +232,17 @@ namespace MiniMessagePack
                 return new Enumerator(ref _reader);
             }
 
-            public struct Enumerator : IEnumerator<Reader>
+            public struct Enumerator : IEnumerator<MessagePackReader>
             {
                 private SequencialReader _reader;
-                private Reader _current;
+                private MessagePackReader _current;
                 private readonly int _count;
                 private int _index;
 
-                internal Enumerator(ref Reader r)
+                internal Enumerator(ref MessagePackReader r)
                 {
                     _reader = new SequencialReader(r._reader.Source, r._reader.Position);
-                    _current = new Reader();
+                    _current = new MessagePackReader();
                     _index = 0;
                     _count = _reader.ReadArrayElementCount();
                 }
@@ -249,7 +250,7 @@ namespace MiniMessagePack
                 {
                     if (_index < _count)
                     {
-                        _current = new Reader(_reader.Source, _reader.Position);
+                        _current = new MessagePackReader(_reader.Source, _reader.Position);
                         _reader.SkipElement();
                         _index++;
                         return true;
@@ -258,7 +259,7 @@ namespace MiniMessagePack
                     return false;
                 }
 
-                public Reader Current { get { return _current; } }
+                public MessagePackReader Current { get { return _current; } }
 
                 public void Dispose() { }
 
@@ -270,7 +271,7 @@ namespace MiniMessagePack
                         {
                             throw new MiniMessagePackException(string.Format("Invalid access to array. index={0}", _index));
                         }
-                        return new Reader(ref _current);
+                        return new MessagePackReader(ref _current);
                     }
                 }
 
@@ -282,9 +283,9 @@ namespace MiniMessagePack
         }
 
 
-        struct MsgpackReader
+        struct MessagePackProcessor
         {
-            public MsgpackReader(byte[] data, int position = 0)
+            public MessagePackProcessor(byte[] data, int position = 0)
             {
                 _source = data;
                 _position = position;

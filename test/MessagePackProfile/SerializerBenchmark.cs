@@ -112,7 +112,7 @@ namespace MessagePackProfile
         [Benchmark]
         public void Array_MiniMessagePackForeach1()
         {
-            var reader = Reader.Create(this.ArrayModelSerialized);
+            var reader = MessagePackReader.Create(this.ArrayModelSerialized);
 
             //faster than below
             foreach (var arrayValue in reader.AsArrayEnumerable())
@@ -127,7 +127,7 @@ namespace MessagePackProfile
         [Benchmark]
         public void Array_MiniMessagePackForeach2()
         {
-            var reader = Reader.Create(this.ArrayModelSerialized);
+            var reader = MessagePackReader.Create(this.ArrayModelSerialized);
 
             //faster than below
             foreach(var arrayValue in reader.AsArrayEnumerable())
@@ -155,7 +155,7 @@ namespace MessagePackProfile
         [Benchmark]
         public void Array_MiniMessagePackFor()
         {
-            var reader = Reader.Create(this.ArrayModelSerialized);
+            var reader = MessagePackReader.Create(this.ArrayModelSerialized);
 
             var length = reader.ArrayLength;
             for (int i = 0; i < length; i++)
@@ -171,11 +171,11 @@ namespace MessagePackProfile
         [Benchmark]
         public void Array_MiniMessagePackBytesKey()
         {
-            var reader = Reader.Create(this.ArrayModelSerialized);
+            var reader = MessagePackReader.Create(this.ArrayModelSerialized);
 
-            var KeyBytes = Reader.ToBytes("Key");
-            var IntValueBytes = Reader.ToBytes("IntValue");
-            var FloatValueBytes = Reader.ToBytes("FloatValue");
+            var KeyBytes = MessagePackReader.KeyToBytes("Key");
+            var IntValueBytes = MessagePackReader.KeyToBytes("IntValue");
+            var FloatValueBytes = MessagePackReader.KeyToBytes("FloatValue");
 
             foreach (var arrayValue in reader.AsArrayEnumerable())
             {
