@@ -16,6 +16,8 @@ MiniMessagePack is inspired by MiniJSON[1] and MessagePack-CSharp[2].
 * .NET Framework 3.5
     * まだUnity/.NET3.5環境なユーザーがいるはずです（私
     * Some Unity users still need to use .NET3 ...(me too
+* not unsafe
+    * do not force change unsafe setting of Unity.
 * MiniJSON Like
     * 単独ファイル
         * 導入が簡単
@@ -79,5 +81,7 @@ If you want to do it, I recommend to use other libraries, like MsgPackCli, Messa
 1000要素配列を走査しプロパティを参照。負荷が低すぎるような・・・
 
 read array of 1000 instances and get properties. is it true...?
+
+Flatbuffers and MessagePack-CSharp are crazy fast!
 
 ![profile](https://github.com/BigOyayubi/MiniMessagePack/blob/master/doc/profile.jpg)
