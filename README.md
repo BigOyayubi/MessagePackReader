@@ -1,12 +1,14 @@
-# MiniMessagePack
+# MessagePackReader
 
 simple and nongeneric MessagePack Reader for C#. 
 
+※同じライブラリ名があることに気が付いたのでライブラリ名修正しました。
+
 # References
 
-MiniMessagePackはMiniJSON[1]とMessagePack-CSharp[2]を参考にしています
+MessagePackReaderはMiniJSON[1]とMessagePack-CSharp[2]を参考にしています
 
-MiniMessagePack is inspired by MiniJSON[1] and MessagePack-CSharp[2].
+MessagePackReader is inspired by MiniJSON[1] and MessagePack-CSharp[2].
 
 * [1] MiniJSON, https://gist.github.com/darktable/1411710
 * [2] MessagePack-CSharp, https://github.com/neuecc/MessagePack-CSharp
@@ -38,17 +40,17 @@ MiniMessagePack is inspired by MiniJSON[1] and MessagePack-CSharp[2].
 
 # Warning
 
-MiniMessagePack can "not" serialize data.
+MessagePackReader can "not" serialize data.
 
 If you want to do it, I recommend to use other libraries, like MsgPackCli, MessagePack-CSharp...
 
 # QuickStart
 
-* Copy src/MiniMessagePack/MessagePack/MiniMessagePack.cs to your project
+* Copy src/MessagePackReader/MessagePack/MessagePackReader.cs to your project
 
 ```csharp
   byte[] msgpack;
-  var reader = MiniMessagePack.MessagePackReader.Create(msgpack);
+  var reader = MessagePackReader.MessagePackReader.Create(msgpack);
   
   //simple pattern. easy to use but slow.
   {
@@ -67,8 +69,8 @@ If you want to do it, I recommend to use other libraries, like MsgPackCli, Messa
 
   //fastest pattern. reuse string key as utf8 byte[].
   {
-    var byteKey = MiniMessagePack.MessagePackReader.KeyToBytes("ByteValue");
-    var strKey  = MiniMessagePack.MessagePackReader.KeyToBytes("StringValue");
+    var byteKey = MessagePackReader.MessagePackReader.KeyToBytes("ByteValue");
+    var strKey  = MessagePackReader.MessagePackReader.KeyToBytes("StringValue");
     foreach(var arrayValue in reader.AsArrayEnumerable()){
       byte   b = arrayValue[byteKey].GetByte();
       string s = arrayValue[strKey ].GetString();
@@ -84,4 +86,4 @@ read array of 1000 instances and get properties. is it true...?
 
 Flatbuffers and MessagePack-CSharp are crazy fast!
 
-![profile](https://github.com/BigOyayubi/MiniMessagePack/blob/master/doc/profile.jpg)
+![profile](https://github.com/BigOyayubi/MessagePackReader/blob/master/doc/profile.jpg)
