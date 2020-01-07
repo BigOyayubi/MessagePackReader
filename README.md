@@ -18,8 +18,9 @@ MessagePackReader is inspired by MiniJSON[1] and MessagePack-CSharp[2].
 * .NET Framework 3.5
     * まだUnity/.NET3.5環境なユーザーがいるはずです（私
     * Some Unity users still need to use .NET3 ...(me too
-* not unsafe
-    * do not force change unsafe setting of Unity.
+* do not use unsafe(default)
+    * do not force change unsafe setting of Unity.<br>
+      but you can use #define UNSAFE_BYTEBUFFER, it has an impact on memory performance.
 * MiniJSON Like
     * 単独ファイル
         * 導入が簡単
