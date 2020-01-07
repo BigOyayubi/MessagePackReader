@@ -2,7 +2,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.28307.779
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MiniMessagePack", "MessagePack\MiniMessagePack.csproj", "{201004C2-D7AA-4EF0-B30C-280A28390613}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MessagePackReader", "MessagePack\MessagePackReader.csproj", "{201004C2-D7AA-4EF0-B30C-280A28390613}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MessagePackTest", "..\..\test\MessagePackTest\MessagePackTest.csproj", "{CDA477E1-463F-422C-B2C5-AF33B0DD7D0C}"
 EndProject

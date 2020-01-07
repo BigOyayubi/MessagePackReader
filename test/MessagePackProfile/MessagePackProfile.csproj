@@ -224,14 +224,14 @@
     <Analyzer Include="..\..\src\MiniMessagePack\packages\Microsoft.CodeAnalysis.Analyzers.2.9.8\analyzers\dotnet\cs\Microsoft.CodeAnalysis.CSharp.Analyzers.dll" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\src\MiniMessagePack\MessagePack\MiniMessagePack.csproj">
-      <Project>{201004c2-d7aa-4ef0-b30c-280a28390613}</Project>
-      <Name>MiniMessagePack</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <Content Include="FlatBuffers\FlatBuffers.Core.csproj" />
     <Content Include="FlatBuffers\FlatBuffers.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\MiniMessagePack\MessagePack\MessagePackReader.csproj">
+      <Project>{201004c2-d7aa-4ef0-b30c-280a28390613}</Project>
+      <Name>MessagePackReader</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

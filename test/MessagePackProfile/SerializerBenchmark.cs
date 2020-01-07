@@ -4,7 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using BenchmarkDotNet;
 using BenchmarkDotNet.Attributes;
-using MiniMessagePack;
+using MessagePackReader;
 using FlatBuffers;
 
 namespace MessagePackProfile
@@ -12,7 +12,7 @@ namespace MessagePackProfile
     [Config(typeof(BenchmarkConfig))]
     public class SerializerBenchmark
     {
-        private byte[] ArrayModelSerialized;    //for MsgPackCli, MiniMessagePack, MessagePack-CSharp
+        private byte[] ArrayModelSerialized;    //for MsgPackCli, MessagePackReader, MessagePack-CSharp
         private byte[] ArrayModelSerializedIdx; //for MessagePack-CSharp KeyAttribute
         private byte[] ArrayModelFbsSerialized; //for flatbuffers
         private string ArrayModelJsonString;    //for MiniJson, Utf8Json
@@ -190,7 +190,7 @@ namespace MessagePackProfile
         [Benchmark]
         public void Array_MiniMessagePackForeach1()
         {
-            var reader = MessagePackReader.Create(this.ArrayModelSerialized);
+            var reader = MessagePackReader.MsgPackView.Create(this.ArrayModelSerialized);
 
             //faster than below
             foreach (var arrayValue in reader.AsArrayEnumerable())
@@ -205,7 +205,7 @@ namespace MessagePackProfile
         [Benchmark]
         public void Array_MiniMessagePackForeach2()
         {
-            var reader = MessagePackReader.Create(this.ArrayModelSerialized);
+            var reader = MessagePackReader.MsgPackView.Create(this.ArrayModelSerialized);
 
             //faster than below
             foreach(var arrayValue in reader.AsArrayEnumerable())
@@ -233,7 +233,7 @@ namespace MessagePackProfile
         [Benchmark]
         public void Array_MiniMessagePackFor()
         {
-            var reader = MessagePackReader.Create(this.ArrayModelSerialized);
+            var reader = MessagePackReader.MsgPackView.Create(this.ArrayModelSerialized);
 
             var length = reader.ArrayLength;
             for (int i = 0; i < length; i++)
@@ -249,11 +249,11 @@ namespace MessagePackProfile
         [Benchmark]
         public void Array_MiniMessagePackBytesKey()
         {
-            var reader = MessagePackReader.Create(this.ArrayModelSerialized);
+            var reader = MessagePackReader.MsgPackView.Create(this.ArrayModelSerialized);
 
-            var KeyBytes = MessagePackReader.KeyToBytes("Key");
-            var IntValueBytes = MessagePackReader.KeyToBytes("IntValue");
-            var FloatValueBytes = MessagePackReader.KeyToBytes("FloatValue");
+            var KeyBytes = MessagePackReader.MsgPackView.KeyToBytes("Key");
+            var IntValueBytes = MessagePackReader.MsgPackView.KeyToBytes("IntValue");
+            var FloatValueBytes = MessagePackReader.MsgPackView.KeyToBytes("FloatValue");
 
             foreach (var arrayValue in reader.AsArrayEnumerable())
             {

@@ -5,9 +5,10 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{201004C2-D7AA-4EF0-B30C-280A28390613}</ProjectGuid>
     <OutputType>Library</OutputType>
-    <RootNamespace>MiniMessagePack</RootNamespace>
-    <AssemblyName>MiniMessagePack</AssemblyName>
+    <RootNamespace>MessagePackReader</RootNamespace>
+    <AssemblyName>MessagePackReader</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -32,7 +33,7 @@
     <Reference Include="System" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="MiniMessagePack.cs" />
+    <Compile Include="MessagePackReader.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
