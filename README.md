@@ -87,4 +87,18 @@ read array of 1000 instances and get properties. is it true...?
 
 Flatbuffers and MessagePack-CSharp are crazy fast!
 
-![profile](https://github.com/BigOyayubi/MessagePackReader/blob/master/doc/profile.jpg)
+
+|                                  Method |        Mean | Allocated |
+|---------------------------------------- |------------:|----------:|
+|               Array_Flatbuffers         |    285.4 us |  19.65 KB |
+|         Array_MessagePackCSharp         |    769.0 us |  50.83 KB |
+|  Array_MessagePackCSharpKeyAttr         |    228.8 us |  50.83 KB |
+| Array_MessagePackCSharpTypeless         |  1,176.5 us | 402.24 KB |
+|                  Array_Utf8Json         |  1,790.7 us | 570.65 KB |
+|                  Array_MiniJSON         |  2,561.5 us | 1107.3 KB |
+|                Array_MsgPackCli         |    884.2 us |    176 KB |
+|   Array_MiniMessagePackForeach1         |    675.0 us |  78.25 KB |
+|   Array_MiniMessagePackForeach2         |    809.1 us | 191.71 KB |
+|        Array_MiniMessagePackFor         | 86,676.5 us |  78.67 KB |
+|   Array_MiniMessagePackBytesKey         |    567.0 us |  35.28 KB |
+|   Array_MiniMessagePackBytesKey(unsafe) |    533.6 us |  19.63 KB |
