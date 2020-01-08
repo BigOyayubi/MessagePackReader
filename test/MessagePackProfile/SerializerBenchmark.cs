@@ -267,9 +267,9 @@ namespace MessagePackProfile
          {
              var reader = MessagePackReader2.MsgPackView.Create(this.ArrayModelSerialized);
  
-             var KeyBytes = MessagePackReader2.MsgPackView.KeyToBytes("Key");
-             var IntValueBytes = MessagePackReader2.MsgPackView.KeyToBytes("IntValue");
-             var FloatValueBytes = MessagePackReader2.MsgPackView.KeyToBytes("FloatValue");
+             var KeyBytes = MessagePackReader2.MsgPackView.KeyToSpan("Key");
+             var IntValueBytes = MessagePackReader2.MsgPackView.KeyToSpan("IntValue");
+             var FloatValueBytes = MessagePackReader2.MsgPackView.KeyToSpan("FloatValue");
  
              foreach (var arrayValue in reader.AsArrayEnumerable())
              {

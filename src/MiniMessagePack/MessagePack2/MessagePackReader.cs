@@ -29,7 +29,7 @@ namespace MessagePackReader2
             return Create(data.Span);
         }
 
-        public static MsgPackView Create(in ReadOnlySpan<byte> data)
+        public static MsgPackView Create(ReadOnlySpan<byte> data)
         {
             return new MsgPackView(data);
         }
@@ -45,6 +45,11 @@ namespace MessagePackReader2
         public static byte[] KeyToBytes(string key)
         {
             return System.Text.Encoding.UTF8.GetBytes(key);
+        }
+
+        public static ReadOnlySpan<byte> KeyToSpan(string key)
+        {
+            return new ReadOnlySpan<byte>(KeyToBytes(key));
         }
 
         public MsgPackView this[string key] => this[KeyToBytes(key)];
@@ -233,7 +238,7 @@ namespace MessagePackReader2
     {
         readonly ReadOnlySpan<byte> _span;
 
-        MsgPackView(in ReadOnlySpan<byte> data)
+        MsgPackView(ReadOnlySpan<byte> data)
         {
             _span = data;
         }
@@ -252,7 +257,7 @@ namespace MessagePackReader2
         {
             private readonly ReadOnlySpan<byte> _span;
 
-            internal MapEnumerable(in ReadOnlySpan<byte> span)
+            internal MapEnumerable(ReadOnlySpan<byte> span)
             {
                 _span = span;
             }
@@ -268,7 +273,7 @@ namespace MessagePackReader2
             private ReadOnlySpan<byte> _currentMapKey;
             private ReadOnlySpan<byte> _currentMapValue;
 
-            internal MapEnumerator(in ReadOnlySpan<byte> span)
+            internal MapEnumerator(ReadOnlySpan<byte> span)
             {
                 _reader = new SequentialReader(span);
                 if (!_reader.TryReadMapCount(out _count))
@@ -315,7 +320,7 @@ namespace MessagePackReader2
             public string KeyAsString => StringUtil.GetString(Key);
             public readonly MsgPackView Value;
 
-            internal MessagePackMapElement(in ReadOnlySpan<byte> key, in MsgPackView value)
+            internal MessagePackMapElement(ReadOnlySpan<byte> key, in MsgPackView value)
             {
                 Key = key;
                 Value = value;
@@ -383,7 +388,7 @@ namespace MessagePackReader2
             private readonly ReadOnlySpan<byte> _source;
             private int _position;
 
-            public SequentialReader(in ReadOnlySpan<byte> source)
+            public SequentialReader(ReadOnlySpan<byte> source)
             {
                 _source = source;
                 _position = 0;
@@ -521,7 +526,7 @@ namespace MessagePackReader2
                 return true;
             }
 
-            public bool TryReadMapElementPosition(in ReadOnlySpan<byte> key, out int v)
+            public bool TryReadMapElementPosition(ReadOnlySpan<byte> key, out int v)
             {
                 v = default;
                 if (!TryReadMapElementCount(out int mapCount)) return false;
@@ -545,7 +550,7 @@ namespace MessagePackReader2
                 return false;
             }
 
-            bool TryCompareMayKey(in ReadOnlySpan<byte> key, out bool v)
+            bool TryCompareMayKey(ReadOnlySpan<byte> key, out bool v)
             {
                 v = default;
                 var reader = new SequentialReader(_source.Slice(_position));
@@ -1385,7 +1390,7 @@ namespace MessagePackReader2
             /// </summary>
             interface IBytesConverter<T>
             {
-                T To(in ReadOnlySpan<byte> span);
+                T To(ReadOnlySpan<byte> span);
             }
 
             class BytesConverterResolver
@@ -1436,7 +1441,7 @@ namespace MessagePackReader2
 
                 class ByteConverter : IBytesConverter<byte>
                 {
-                    public byte To(in ReadOnlySpan<byte> span)
+                    public byte To(ReadOnlySpan<byte> span)
                     {
                         return span[0];
                     }
@@ -1444,7 +1449,7 @@ namespace MessagePackReader2
 
                 class SByteConverter : IBytesConverter<sbyte>
                 {
-                    public sbyte To(in ReadOnlySpan<byte> span)
+                    public sbyte To(ReadOnlySpan<byte> span)
                     {
                         return unchecked((sbyte) span[0]);
                     }
@@ -1452,7 +1457,7 @@ namespace MessagePackReader2
 
                 class ShortConverter : IBytesConverter<short>
                 {
-                    public short To(in ReadOnlySpan<byte> span)
+                    public short To(ReadOnlySpan<byte> span)
                     {
                         var v = MemoryMarshal.Read<short>(span);
                         return (!BitConverter.IsLittleEndian)
@@ -1463,7 +1468,7 @@ namespace MessagePackReader2
 
                 class UShortConverter : IBytesConverter<ushort>
                 {
-                    public ushort To(in ReadOnlySpan<byte> span)
+                    public ushort To(ReadOnlySpan<byte> span)
                     {
                         var v = MemoryMarshal.Read<ushort>(span);
                         return (!BitConverter.IsLittleEndian)
@@ -1474,7 +1479,7 @@ namespace MessagePackReader2
 
                 class IntConverter : IBytesConverter<int>
                 {
-                    public int To(in ReadOnlySpan<byte> span)
+                    public int To(ReadOnlySpan<byte> span)
                     {
                         var v = MemoryMarshal.Read<int>(span);
                         return (!BitConverter.IsLittleEndian)
@@ -1485,7 +1490,7 @@ namespace MessagePackReader2
 
                 class UIntConverter : IBytesConverter<uint>
                 {
-                    public uint To(in ReadOnlySpan<byte> span)
+                    public uint To(ReadOnlySpan<byte> span)
                     {
                         var v = MemoryMarshal.Read<uint>(span);
                         return (!BitConverter.IsLittleEndian)
@@ -1496,7 +1501,7 @@ namespace MessagePackReader2
 
                 class LongConverter : IBytesConverter<long>
                 {
-                    public long To(in ReadOnlySpan<byte> span)
+                    public long To(ReadOnlySpan<byte> span)
                     {
                         var v = MemoryMarshal.Read<long>(span);
                         return (!BitConverter.IsLittleEndian)
@@ -1507,7 +1512,7 @@ namespace MessagePackReader2
 
                 class ULongConverter : IBytesConverter<ulong>
                 {
-                    public ulong To(in ReadOnlySpan<byte> span)
+                    public ulong To(ReadOnlySpan<byte> span)
                     {
                         var v = MemoryMarshal.Read<ulong>(span);
                         return (!BitConverter.IsLittleEndian)
@@ -1518,7 +1523,7 @@ namespace MessagePackReader2
 
                 class FloatConverter : IBytesConverter<float>
                 {
-                    public float To(in ReadOnlySpan<byte> span)
+                    public float To(ReadOnlySpan<byte> span)
                     {
                         if (!BitConverter.IsLittleEndian)
                         {
@@ -1526,19 +1531,30 @@ namespace MessagePackReader2
                         }
                         else
                         {
+#if false                            
                             Span<byte> tmp = stackalloc byte[sizeof(float)];
                             tmp[0] = span[3];
                             tmp[1] = span[2];
                             tmp[2] = span[1];
                             tmp[3] = span[0];
                             return MemoryMarshal.Read<float>(tmp);
+#else
+                            uint tmp = MemoryMarshal.Read<uint>(span);
+                            return To(tmp);
+#endif
                         }
+                    }
+
+                    unsafe float To(uint v)
+                    {
+                        var tmp = System.Buffers.Binary.BinaryPrimitives.ReverseEndianness(v);
+                        return *(float*) &tmp;
                     }
                 }
 
                 class DoubleConverter : IBytesConverter<double>
                 {
-                    public double To(in ReadOnlySpan<byte> span)
+                    public double To(ReadOnlySpan<byte> span)
                     {
                         if (!BitConverter.IsLittleEndian)
                         {
@@ -1546,6 +1562,7 @@ namespace MessagePackReader2
                         }
                         else
                         {
+#if false                            
                             Span<byte> tmp = stackalloc byte[sizeof(double)];
                             tmp[0] = span[7];
                             tmp[1] = span[6];
@@ -1556,7 +1573,18 @@ namespace MessagePackReader2
                             tmp[6] = span[1];
                             tmp[7] = span[0];
                             return MemoryMarshal.Read<double>(tmp);
+#else
+                            var tmp = MemoryMarshal.Read<ulong>(span);
+                            return To(tmp);
+#endif
+
                         }
+                    }
+
+                    unsafe double To(ulong v)
+                    {
+                        var tmp = System.Buffers.Binary.BinaryPrimitives.ReverseEndianness(v);
+                        return *(double*) &tmp;
                     }
                 }
             } // end of class BytesConverterResolver
@@ -1589,7 +1617,7 @@ namespace MessagePackReader2
 
         static class StringUtil
         {
-            public static unsafe string GetString(in ReadOnlySpan<byte> span)
+            public static unsafe string GetString(ReadOnlySpan<byte> span)
             {
                 fixed (byte* ptr = &MemoryMarshal.GetReference(span))
                 {
