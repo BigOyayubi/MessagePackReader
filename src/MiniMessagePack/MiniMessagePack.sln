@@ -8,6 +8,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MessagePackTest", "..\..\te
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MessagePackProfile", "..\..\test\MessagePackProfile\MessagePackProfile.csproj", "{10004901-31CA-437E-BDB7-8C41EA82F756}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MessagePackReader2", "MessagePack2\MessagePackReader2.csproj", "{B1436C14-990C-494E-9081-3BB2B4AF806C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|anycpu = Debug|anycpu
@@ -26,6 +28,10 @@ Global
 		{10004901-31CA-437E-BDB7-8C41EA82F756}.Debug|anycpu.Build.0 = Debug|Any CPU
 		{10004901-31CA-437E-BDB7-8C41EA82F756}.Release|anycpu.ActiveCfg = Release|Any CPU
 		{10004901-31CA-437E-BDB7-8C41EA82F756}.Release|anycpu.Build.0 = Release|Any CPU
+		{B1436C14-990C-494E-9081-3BB2B4AF806C}.Debug|anycpu.ActiveCfg = Debug|Any CPU
+		{B1436C14-990C-494E-9081-3BB2B4AF806C}.Debug|anycpu.Build.0 = Debug|Any CPU
+		{B1436C14-990C-494E-9081-3BB2B4AF806C}.Release|anycpu.ActiveCfg = Release|Any CPU
+		{B1436C14-990C-494E-9081-3BB2B4AF806C}.Release|anycpu.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

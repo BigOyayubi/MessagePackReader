@@ -7,12 +7,14 @@ using System.Diagnostics;
 
 // There is 1 #define that have an impact on memory performance
 //
-//      UNSAFE_BYTEBUFFER 
+//      UNSAFE_BYTEBUFFER
 //          This will use unsafe code to manipulate the underlying bytes.
 //
 // Do it your own risk!
 
-
+/// <summary>
+/// .Net3.5/C#4で実装したMessagePackReader
+/// </summary>
 namespace MessagePackReader
 {
     public partial struct MsgPackView
@@ -1521,7 +1523,7 @@ namespace MessagePackReader
                     return (!BitConverter.IsLittleEndian) ? v : ReverseBytes(v);
                 }
             }
-            
+
             class FloatConverter : IBytesConverter<float>
             {
 #if UNSAFE_BYTEBUFFER

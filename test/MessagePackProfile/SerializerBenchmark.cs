@@ -262,5 +262,21 @@ namespace MessagePackProfile
                 arrayValue[FloatValueBytes].GetFloat();
             }
         }
-    }
+         [Benchmark]
+         public void Array_MessagePackReader2BytesKey()
+         {
+             var reader = MessagePackReader2.MsgPackView.Create(this.ArrayModelSerialized);
+ 
+             var KeyBytes = MessagePackReader2.MsgPackView.KeyToBytes("Key");
+             var IntValueBytes = MessagePackReader2.MsgPackView.KeyToBytes("IntValue");
+             var FloatValueBytes = MessagePackReader2.MsgPackView.KeyToBytes("FloatValue");
+ 
+             foreach (var arrayValue in reader.AsArrayEnumerable())
+             {
+                 arrayValue[KeyBytes].GetString();
+                 arrayValue[IntValueBytes].GetInt();
+                 arrayValue[FloatValueBytes].GetFloat();
+             }
+         }
+     }
 }

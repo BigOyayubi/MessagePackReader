@@ -228,6 +228,10 @@
     <Content Include="FlatBuffers\FlatBuffers.csproj" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\src\MiniMessagePack\MessagePack2\MessagePackReader2.csproj">
+      <Project>{b1436c14-990c-494e-9081-3bb2b4af806c}</Project>
+      <Name>MessagePackReader2</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\src\MiniMessagePack\MessagePack\MessagePackReader.csproj">
       <Project>{201004c2-d7aa-4ef0-b30c-280a28390613}</Project>
       <Name>MessagePackReader</Name>
