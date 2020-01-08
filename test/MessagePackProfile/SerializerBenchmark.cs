@@ -93,7 +93,7 @@ namespace MessagePackProfile
             }
         }
 
-        [Benchmark]
+        //[Benchmark]
         public void Array_MessagePackCSharp()
         {
             var deserialize = MessagePack.MessagePackSerializer.Deserialize<IList<Models.SampleModel1>>(this.ArrayModelSerialized);
@@ -107,7 +107,7 @@ namespace MessagePackProfile
             }
         }
 
-        [Benchmark]
+        //[Benchmark]
         public void Array_MessagePackCSharpKeyAttr()
         {
             var deserialize = MessagePack.MessagePackSerializer.Deserialize<IList<Models.SampleModel2>>(this.ArrayModelSerializedIdx);
@@ -121,7 +121,7 @@ namespace MessagePackProfile
             }
         }
 
-        [Benchmark]
+        //[Benchmark]
         public void Array_MessagePackCSharpTypeless()
         {
             var deserialize = MessagePack.MessagePackSerializer.Deserialize<object>(this.ArrayModelSerialized);
@@ -144,7 +144,7 @@ namespace MessagePackProfile
             }
         }
 
-        [Benchmark]
+        //[Benchmark]
         public void Array_Utf8Json()
         {
             var deserialize = Utf8Json.JsonSerializer.Deserialize<dynamic>(this.ArrayModelJsonString) as List<object>;
@@ -158,7 +158,7 @@ namespace MessagePackProfile
             }
         }
 
-        [Benchmark]
+        //[Benchmark]
         public void Array_MiniJSON()
         {
             var deserialize = MiniJSON.Json.Deserialize(this.ArrayModelJsonString) as IList<object>;
@@ -172,7 +172,7 @@ namespace MessagePackProfile
             }
         }
 
-        [Benchmark]
+        //[Benchmark]
         public void Array_MsgPackCli()
         {
             var serializer = MsgPack.Serialization.MessagePackSerializer.Get<IList<Models.SampleModel1>>();
@@ -187,7 +187,7 @@ namespace MessagePackProfile
             }
         }
 
-        [Benchmark]
+        //[Benchmark]
         public void Array_MiniMessagePackForeach1()
         {
             var reader = MessagePackReader.MsgPackView.Create(this.ArrayModelSerialized);
@@ -202,7 +202,7 @@ namespace MessagePackProfile
         }
 
 
-        [Benchmark]
+        //[Benchmark]
         public void Array_MiniMessagePackForeach2()
         {
             var reader = MessagePackReader.MsgPackView.Create(this.ArrayModelSerialized);
@@ -230,7 +230,7 @@ namespace MessagePackProfile
             }
         }
 
-        [Benchmark]
+        //[Benchmark]
         public void Array_MiniMessagePackFor()
         {
             var reader = MessagePackReader.MsgPackView.Create(this.ArrayModelSerialized);

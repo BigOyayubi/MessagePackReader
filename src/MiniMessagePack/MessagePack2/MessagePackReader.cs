@@ -533,16 +533,14 @@ namespace MessagePackReader2
 
                 for (int i = 0; i < mapCount; i++)
                 {
-                    if (!TryCompareMayKey(key, out bool compareResult)) return false;
+                    if (!TryReadAndCompareMapKey(key, out bool compareResult)) return false;
                     if (compareResult)
                     {
-                        if (!TrySkipElement()) return false; //key
                         v = _position;
                         return true;
                     }
                     else
                     {
-                        if (!TrySkipElement()) return false; //key
                         if (!TrySkipElement()) return false; //value
                     }
                 }
@@ -550,29 +548,22 @@ namespace MessagePackReader2
                 return false;
             }
 
-            bool TryCompareMayKey(ReadOnlySpan<byte> key, out bool v)
+            bool TryReadAndCompareMapKey(ReadOnlySpan<byte> key, out bool v)
             {
                 v = default;
-                var reader = new SequentialReader(_source.Slice(_position));
-                if (!reader.TryPeekToken(out byte token)) return false;
+                if (!TryPeekToken(out byte token)) return false;
                 if (token == Spec.Fmt_Nil) return false;
 
-                if (!reader.TryReadStringByteLength(out int stringByteLength)) return false;
+                if (!TryReadStringByteLength(out int stringByteLength)) return false;
                 if (key.Length != stringByteLength)
                 {
                     v = false;
+                    _position += stringByteLength;
                     return true;
                 }
 
-                var span = reader.UnreadSpan;
-                for (var i = 0; i < stringByteLength; i++)
-                {
-                    if (key[i] == span[i]) continue;
-                    v = false;
-                    return true;
-                }
-
-                v = true;
+                v = key.SequenceEqual(_source.Slice(_position, stringByteLength));
+                _position += stringByteLength;
                 return true;
             }
 
