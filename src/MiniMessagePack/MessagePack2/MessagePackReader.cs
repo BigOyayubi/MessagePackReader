@@ -16,6 +16,8 @@ namespace MessagePackReader2
 {
     /// <summary>
     /// .NET4.x/C#7.2/unsafeを使ったMessagePackReader実装
+    /// .NET3.5版より遅いがメモリ効率は良い
+    /// 　※ReadOnlySpan<byte>の[index]参照はbyte[]の[index]参照より少し遅い
     /// </summary>
     public readonly ref partial struct MsgPackView
     {
@@ -60,7 +62,7 @@ namespace MessagePackReader2
             get
             {
                 ThrowEndOfStreamExceptionUnless(
-                    new SequentialReader(_span).TryReadMapElementPosition(key, out int v)
+                    new SequentialReader(_span).TryReadMapValuePosition(key, out int v)
                 );
                 return new MsgPackView(_span.Slice(v));
             }
@@ -295,12 +297,14 @@ namespace MessagePackReader2
                         _index = _count + 1;
                         return false; //key
                     }
+
                     _currentMapValue = _reader.UnreadSpan;
                     if (!_reader.TrySkipElement())
                     {
                         _index = _count + 1;
                         return false; //value
                     }
+
                     return true;
                 }
 
@@ -401,17 +405,7 @@ namespace MessagePackReader2
             /// <summary>
             /// Seek位置のTokenを取得
             /// </summary>
-            public bool TryPeekToken(out byte token)
-            {
-                if (_source.Length <= _position)
-                {
-                    token = default;
-                    return false;
-                }
-
-                token = _source[_position];
-                return true;
-            }
+            public byte PeekToken => _source[_position];
 
             /// <summary>
             /// Seek位置のTokenを取得し位置を進める
@@ -526,7 +520,7 @@ namespace MessagePackReader2
                 return true;
             }
 
-            public bool TryReadMapElementPosition(ReadOnlySpan<byte> key, out int v)
+            public bool TryReadMapValuePosition(ReadOnlySpan<byte> key, out int v)
             {
                 v = default;
                 if (!TryReadMapElementCount(out int mapCount)) return false;
@@ -548,10 +542,10 @@ namespace MessagePackReader2
                 return false;
             }
 
-            bool TryReadAndCompareMapKey(ReadOnlySpan<byte> key, out bool v)
+            unsafe bool TryReadAndCompareMapKey(ReadOnlySpan<byte> key, out bool v)
             {
                 v = default;
-                if (!TryPeekToken(out byte token)) return false;
+                var token = PeekToken;
                 if (token == Spec.Fmt_Nil) return false;
 
                 if (!TryReadStringByteLength(out int stringByteLength)) return false;
@@ -562,8 +556,34 @@ namespace MessagePackReader2
                     return true;
                 }
 
-                v = key.SequenceEqual(_source.Slice(_position, stringByteLength));
+                v = CompareSpan(_source.Slice(_position, stringByteLength), key);
+
+                v = true;
                 _position += stringByteLength;
+                return true;
+            }
+
+            unsafe bool CompareSpan(ReadOnlySpan<byte> lh, ReadOnlySpan<byte> rh)
+            {
+                int length = lh.Length;
+                int lengthLong = length / sizeof(ulong) * sizeof(ulong);
+                fixed (byte* ptrL = &MemoryMarshal.GetReference(lh))
+                {
+                    fixed (byte* ptrR = &MemoryMarshal.GetReference(rh))
+                    {
+                        int i = 0;
+                        for (; i < lengthLong; i += sizeof(ulong))
+                        {
+                            if (*(ulong*) (ptrL + i) != *(ulong*) (ptrR + i)) return false;
+                        }
+
+                        for (; i < length; i++)
+                        {
+                            if (*(ptrL + i) != *(ptrR + i)) return false;
+                        }
+                    }
+                }
+
                 return true;
             }
 
@@ -584,7 +604,7 @@ namespace MessagePackReader2
 
             public bool TrySkipElement()
             {
-                if (!TryPeekToken(out byte token)) return false;
+                var token = PeekToken;
                 var sourceType = Spec.GetSourceType(token);
 
                 switch (sourceType)
@@ -1096,7 +1116,7 @@ namespace MessagePackReader2
             public bool TryReadString(out ReadOnlySpan<byte> v)
             {
                 v = ReadOnlySpan<byte>.Empty;
-                if (!TryPeekToken(out byte token)) return false;
+                var token = PeekToken;
                 if (token == Spec.Fmt_Nil)
                 {
                     //空文字列の場合nil
@@ -1522,7 +1542,7 @@ namespace MessagePackReader2
                         }
                         else
                         {
-#if false                            
+#if false
                             Span<byte> tmp = stackalloc byte[sizeof(float)];
                             tmp[0] = span[3];
                             tmp[1] = span[2];
@@ -1553,7 +1573,7 @@ namespace MessagePackReader2
                         }
                         else
                         {
-#if false                            
+#if false
                             Span<byte> tmp = stackalloc byte[sizeof(double)];
                             tmp[0] = span[7];
                             tmp[1] = span[6];
@@ -1568,7 +1588,6 @@ namespace MessagePackReader2
                             var tmp = MemoryMarshal.Read<ulong>(span);
                             return To(tmp);
 #endif
-
                         }
                     }
 

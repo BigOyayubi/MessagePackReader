@@ -45,6 +45,14 @@ MessagePackReader can "not" serialize data.
 
 If you want to do it, I recommend to use other libraries, like MsgPackCli, MessagePack-CSharp...
 
+# Appendix
+
+Add MessagePackReader2 which uses .NET4.x/C#7.2/unsafe for understanding new C# APIs.
+
+Reader2 has better memory performance, but slower than Reader(.NET3.5ver).
+
+please check src/MiniMessagePack/MessagePack2/MessagePackReader.cs
+
 # QuickStart
 
 * Copy src/MessagePackReader/MessagePack/MessagePackReader.cs to your project
@@ -102,3 +110,6 @@ Flatbuffers and MessagePack-CSharp are crazy fast!
 |        Array_MiniMessagePackFor         | 86,676.5 us |  78.67 KB |
 |   Array_MiniMessagePackBytesKey         |    567.0 us |  35.28 KB |
 |   Array_MiniMessagePackBytesKey(unsafe) |    533.6 us |  19.63 KB |
+| Array_MessagePackReader2BytesKey        |    687.5 us |  19.59 KB |
+
+
